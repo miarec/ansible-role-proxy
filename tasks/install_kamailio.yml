@@ -84,10 +84,11 @@
   notify:
     - restart kamailio
 
-- name: Create SystemD Kamailo Config
+# Create SystemD Service
+- name: Create Kamailio SystemD Service
   template:
-    src: kamailio.cfg.j2
-    dest: "{{ kam_dest_directory }}/kamailio/kamailio.cfg"
+    src: kamailio.service.j2
+    dest: /etc/systemd/system/kamailio.service
     owner: root
     group: root
     mode: 0644
