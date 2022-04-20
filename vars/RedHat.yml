@@ -1,0 +1,26 @@
+---
+redhat_dependencies:
+  - epel-release
+  - @Development tool
+  - bison
+  - pcre-devel
+  - libpcap-devel
+  - flex
+  - git
+  - libevent
+  - json*
+  - libunistring-devel
+  - webkitgtk3-devel
+  - perl
+  - librabbitmq
+  - libevent-devel
+  - librabbitmq-devel
+  - perl-devel
+  - mod_perl-devel
+  - perl-Encode-devel
+  - perl-Qt-devel
+  - perl-Glib-devel
+  - perl-Tk-devel
+  - libpq5
+  - libpq-dev
+  - postgresql

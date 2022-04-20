@@ -1,0 +1,30 @@
+---
+# Create Directory and Clone Repo
+- name: Create directory for source code from Git
+  file:
+    path: "{{ rtpproxy_dest_directory }}"
+    state: directory
+    mode: 0755
+
+- name: Git clone Kamailio
+  git:
+    repo: git://git.miconda.org/rtpproxy
+    dest: "{{ rtpproxy_dest_directory }}/rtpproxy"
+    recursive: yes
+    clone: yes
+
+# Compile Files
+- name: Compile Build Files
+  become: true
+  shell: "{{ item }}"
+  with_items:
+    - "cd {{ rtpproxy_dest_directory }}/rtpproxy && ./configure"
+    - "cd {{ rtpproxy_dest_directory }}/rtpproxy && make all"
+    - "cd {{ rtpproxy_dest_directory }}/rtpproxy && make install"
+
+
+# Create User and Group????
+
+
+# Create system D file
+rtpproxy -A 34.219.244.100 -F -l 10.0.0.184 -m 10000 -M 20000 -s udp:*:7722 -d INFO

@@ -1,0 +1,34 @@
+---
+# vars file for proxy
+kamailio_version: 5.5
+kam_dest_directory: /usr/local/src/kamailio-{{ kamailio_version }}
+rtpproxy_dest_directory: /usr/local/src/rtpproxy
+
+# database variables
+dbhost:
+dbrootuser:
+dbrootpass:
+dbport: 5432
+kam_dbname: kamailio
+kam_dbuser: kamailio
+kam_dbpass: kamailiorw
+
+
+# Configuration Variables
+debug_level: 2
+log_stderror: no
+
+
+# SIP Variables
+ip_private:
+ip_public:
+port_tcp: 5080
+port_udp: 5080
+
+rtp_start: 20000
+rtp_stop: 30000
+
+# Dispatcher Variables
+disp_set: 1
+disp_alg: 4
+

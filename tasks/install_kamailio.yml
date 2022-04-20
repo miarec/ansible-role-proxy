@@ -1,0 +1,95 @@
+---
+# Create User and Group
+- name: Create Kamailio group
+  group:
+    name: kamailio
+    state: present
+
+- name: Create Kamailio user
+  user:
+    name: kamailio
+    system: true
+    shell: "/usr/sbin/nologin"
+    group: kamailio
+    move_home: yes
+    home: /var/run/kamailio
+
+# GIT source code
+- name: Create directory for source code
+  file:
+    path: "{{ kam_dest_directory }}"
+    state: directory
+    mode: 0755
+
+- name: Git clone Kamailio
+  git:
+    repo: git://git.kamailio.org/kamailio
+    dest: "{{ kam_dest_directory }}/kamailio"
+    recursive: no
+    clone: yes
+    version: origin/{{ kamailio_version }}
+
+# Compile Build Files
+- name: Compile Build Files
+  become: true
+  shell: "{{ item }}"
+  with_items:
+    - "cd {{ kam_dest_directory }}/kamailio && make include_modules='db_postgres' cfg"
+    - "cd {{ kam_dest_directory }}/kamailio && make all"
+    - "cd {{ kam_dest_directory }}/kamailio && make install"
+
+# Create Authentication file for access to postgres database
+- name: Create pgpass file
+  template:
+    src: .pgpass.j2
+    dest: ~/.pgpass
+    owner: root
+    group: root
+    mode: 0600
+
+# Create config file that will define the DB Engine
+- name: Create kamctlrc Config
+  template:
+    src: kamctlrc.j2
+    dest: /usr/local/etc/kamailio/kamctlrc
+    owner: root
+    group: root
+    mode: 0644
+
+# Run kamdbctl to setup kamailio database
+- name: Create Database
+  become: true
+  shell: "/usr/local/sbin/kamdbctl create {{ kam_dbname }}"
+  run_once: true
+
+
+# Create Config Files
+- name: Create Local Kamailo Config
+  template:
+    src: kamailio-local.cfg.j2
+    dest: "/usr/local/etc/kamailio/kamailio-local.cfg"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - restart kamailio
+
+- name: Create Kamailo Config
+  template:
+    src: kamailio.cfg.j2
+    dest: "/usr/local/etc/kamailio/kamailio.cfg"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - restart kamailio
+
+- name: Create SystemD Kamailo Config
+  template:
+    src: kamailio.cfg.j2
+    dest: "{{ kam_dest_directory }}/kamailio/kamailio.cfg"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - restart kamailio
