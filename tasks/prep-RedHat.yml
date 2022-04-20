@@ -1,0 +1,12 @@
+---
+# Update yum Cache
+- name: Update ymu Cache
+  yum:
+    update_cache: true
+
+# Install dependencies
+- name: Install Kamailio Package Dependencies
+  yum:
+    state: present
+    name: {{ item }}
+  with_items: {{ redhat_dependencies }}

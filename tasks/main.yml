@@ -7,12 +7,14 @@
   tags: ['package','application','configuration','users','groups']
 
 # Setup/install tasks.
-- include: setup-RedHat.yml
+- include: prep-RedHat.yml
   when: ansible_os_family == 'RedHat'
   tags: ['package','application','configuration']
 
-- include: setup-Debian.yml
+- include: prep-Debian.yml
   when: ansible_os_family == 'Debian'
   tags: ['package','application','configuration']
 
-- include: setup.yml
+- include: install_kamailio.yml
+
+- include: install_rtpproxy.yml
