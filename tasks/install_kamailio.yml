@@ -17,26 +17,26 @@
 # GIT source code
 - name: Create directory for source code
   file:
-    path: "{{ kam_dest_directory }}"
+    path: "{{ kamailio_dest_directory }}"
     state: directory
     mode: 0755
 
 - name: Git clone Kamailio
   git:
     repo: git://git.kamailio.org/kamailio
-    dest: "{{ kam_dest_directory }}/kamailio"
+    dest: "{{ kamailio_dest_directory }}/kamailio"
     recursive: no
     clone: yes
     version: origin/{{ kamailio_version }}
 
 # Compile Build Files
 - name: Compile Build Files
-  become: true
   shell: "{{ item }}"
   with_items:
-    - "cd {{ kam_dest_directory }}/kamailio && make include_modules='db_postgres' cfg"
-    - "cd {{ kam_dest_directory }}/kamailio && make all"
-    - "cd {{ kam_dest_directory }}/kamailio && make install"
+    - "cd {{ kamailio_dest_directory }}/kamailio && make include_modules='db_postgres' cfg"
+    - "cd {{ kamailio_dest_directory }}/kamailio && make all"
+    - "cd {{ kamailio_dest_directory }}/kamailio && make install"
+
 
 # Create Authentication file for access to postgres database
 - name: Create pgpass file
@@ -58,39 +58,9 @@
 
 # Run kamdbctl to setup kamailio database
 - name: Create Database
-  become: true
   shell: "/usr/local/sbin/kamdbctl create {{ kam_dbname }}"
   run_once: true
+  ignore_errors: true     #  I need to look at this
 
 
-# Create Config Files
-- name: Create Local Kamailo Config
-  template:
-    src: kamailio-local.cfg.j2
-    dest: "/usr/local/etc/kamailio/kamailio-local.cfg"
-    owner: root
-    group: root
-    mode: 0644
-  notify:
-    - restart kamailio
 
-- name: Create Kamailo Config
-  template:
-    src: kamailio.cfg.j2
-    dest: "/usr/local/etc/kamailio/kamailio.cfg"
-    owner: root
-    group: root
-    mode: 0644
-  notify:
-    - restart kamailio
-
-# Create SystemD Service
-- name: Create Kamailio SystemD Service
-  template:
-    src: kamailio.service.j2
-    dest: /etc/systemd/system/kamailio.service
-    owner: root
-    group: root
-    mode: 0644
-  notify:
-    - restart kamailio

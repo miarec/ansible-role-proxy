@@ -1,15 +1,12 @@
 ---
-# Update Apt Cache
-- name: Update APT Cache
+# Install dependencies
+- name: Debian - Install Package Dependencies
+  become: true
   apt:
     update_cache: true
-
-# Install dependencies
-- name: Install Kamailio Package Dependencies
-  apt:
     state: present
-    pkg: {{ item }}
-  with_items: {{ debian_dependencies }}
+    pkg: "{{ item }}"
+  with_items: "{{ debian_dependencies }}"
 
 
 

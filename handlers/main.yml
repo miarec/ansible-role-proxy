@@ -6,3 +6,10 @@
     daemon_reload: true
     name: kamailio
     state: restarted
+
+- name: restart rtpproxy
+  become: true
+  systemd:
+    daemon_reload: true
+    name: rtpproxy
+    state: restarted

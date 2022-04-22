@@ -24,14 +24,13 @@
 
 - name: Git clone Kamailio
   git:
-    repo: git://git.miconda.org/rtpproxy
+    repo: https://github.com/sippy/rtpproxy.git
     dest: "{{ rtpproxy_dest_directory }}/rtpproxy"
     recursive: yes
     clone: yes
 
 # Compile Files
 - name: Compile Build Files
-  become: true
   shell: "{{ item }}"
   with_items:
     - "cd {{ rtpproxy_dest_directory }}/rtpproxy && ./configure"
@@ -40,14 +39,3 @@
 
 
 
-# Create SystemD Service
-- name: Create rtpproxy SystemD Service
-  template:
-    src: rtpproxy.service.j2
-    dest: /etc/systemd/system/rtpproxy.service
-    owner: root
-    group: root
-    mode: 0644
-  notify:
-    - restart rtpproxy
-    - restart kamailio

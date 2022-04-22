@@ -1,20 +1,72 @@
 ---
 # tasks file for proxy
 
+# Check for previously installed Kamailio
+- name: Check for existing Kamilio binary.
+  stat:
+    path: "{{ kamailio_bin }}"
+  register: _kamailio_install
+  tags: kamailio
+
+- name: Check Kamailio version if binary exists.
+  command: "{{ kamailio_bin }} --version"
+  register: _kamailio_version
+  when: "_kam_install.stat.exists"
+  changed_when: False
+  failed_when: False
+  tags: kamailio
+
+
+# Check for previously installed rtpproxy
+- name: Check for existing rtpproxy binary.
+  stat:
+    path: "{{ rtpproxy_bin }}"
+  register: _rtpproxy_install
+  tags: rtpproxy
+
+
 # Include variables and define needed variables.
 - name: Include OS-specific variables.
   include_vars: "{{ ansible_os_family }}.yml"
-  tags: ['package','application','configuration','users','groups']
+  tags:
+    - kamailio
+    - rtpproxy
 
-# Setup/install tasks.
-- include: prep-RedHat.yml
+# Install Dependencies
+- name: Install Dependencies (RedHat).
+  include: prep-RedHat.yml
   when: ansible_os_family == 'RedHat'
-  tags: ['package','application','configuration']
+  tags:
+    - kamailio
+    - rtpproxy
 
-- include: prep-Debian.yml
+- name: Install Dependencies (Debian).
+  include: prep-Debian.yml
   when: ansible_os_family == 'Debian'
-  tags: ['package','application','configuration']
+  tags:
+    - kamailio
+    - rtpproxy
 
-- include: install_kamailio.yml
+# Downaload source code and complie
+- name: Install Kamailio.
+  include: install_kamailio.yml
+  when: "not _kamailio_install.stat.exists or kamailio_version is not defined or kamailio_version|string not in _kamailio_version.stdout"
+  tags:
+    - kamailio
 
-- include: install_rtpproxy.yml
+- name: Install rtpproxy.
+  include: install_rtpproxy.yml
+  when: "not _rtpproxy_install.stat.exists"
+  tags:
+    - rtpproxy
+
+# Generate Configuration files
+- name: Configure Kamailio.
+  include: configure_kamailio.yml
+  tags:
+    - kamailio
+
+- name: Configure rtpproxy.
+  include: configure_rtpproxy.yml
+  tags:
+    - rtpproxy
