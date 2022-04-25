@@ -9,8 +9,8 @@ kam_dbuser: kamailio
 kam_dbpass: kamailiorw
 
 # Conenction Variables
-port_tcp: 5080
-port_udp: 5080
+sip_tcp_port: 5080
+sip_udp_port: 5080
 
 rtp_start: 20000
 rtp_stop: 30000

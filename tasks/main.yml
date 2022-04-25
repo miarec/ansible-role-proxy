@@ -1,6 +1,24 @@
 ---
 # tasks file for proxy
 
+# Install Dependencies
+- name: Install Dependencies (RedHat).
+  include: prep-RedHat.yml
+  when: ansible_os_family == 'RedHat'
+  tags:
+    - kamailio
+    - rtpproxy
+    - database
+
+- name: Install Dependencies (Debian).
+  include: prep-Debian.yml
+  when: ansible_os_family == 'Debian'
+  tags:
+    - kamailio
+    - rtpproxy
+    - database
+
+
 # Check for previously installed Kamailio
 - name: Check for existing Kamilio binary.
   stat:
@@ -16,7 +34,6 @@
   failed_when: False
   tags: kamailio
 
-
 # Check for previously installed rtpproxy
 - name: Check for existing rtpproxy binary.
   stat:
@@ -24,6 +41,15 @@
   register: _rtpproxy_install
   tags: rtpproxy
 
+# Check if Database is present
+- name: Check is database is present
+   shell: psql postgres://{{ dbrootuser }}:{{ dbrootpass }}@{{ dbhost }}:{{dbport}}/{{ kam_dbname }} -c '\list'     ## not specify database name????
+   register: _db_status
+   failed_when: _dbstatus.rc == 2
+  run_once: true
+  tags:
+   - kamailio
+   - database
 
 # Include variables and define needed variables.
 - name: Include OS-specific variables.
@@ -32,20 +58,12 @@
     - kamailio
     - rtpproxy
 
-# Install Dependencies
-- name: Install Dependencies (RedHat).
-  include: prep-RedHat.yml
-  when: ansible_os_family == 'RedHat'
+- name: Configure Databaes
+  include: configure_databse.yml
+  when: "{{ kam_dbname }} not in _db_install.stdout"
   tags:
     - kamailio
-    - rtpproxy
-
-- name: Install Dependencies (Debian).
-  include: prep-Debian.yml
-  when: ansible_os_family == 'Debian'
-  tags:
-    - kamailio
-    - rtpproxy
+    - database
 
 # Downaload source code and complie
 - name: Install Kamailio.

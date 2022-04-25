@@ -25,8 +25,8 @@ log_facility=LOG_LOCAL0
 log_prefix="{$mt $hdr(CSeq) $ci} "
 #
 /* define interfaces to bind to */
-listen=udp:{{ private_ip_address }}:{{ port_udp }} advertise {{ public_ip_address }}:{{ port_udp }}
-listen=tcp:{{ private_ip_address }}:{{ port_tcp }} advertise {{ public_ip_address }}:{{ port_tcp }}
+listen=udp:{{ private_ip_address }}:{{ sip_udp_port }} advertise {{ public_ip_address }}:{{ sip_udp_port }}
+listen=tcp:{{ private_ip_address }}:{{ sip_tcp_port }} advertise {{ public_ip_address }}:{{ sip_tcp_port }}
 tcp_connection_lifetime={{ tcp_connection_lifetime }}
 tcp_max_connections={{ tcp_max_connections }}
 #

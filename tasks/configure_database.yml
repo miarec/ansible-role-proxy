@@ -1,0 +1,22 @@
+---
+    - name: Create Import Script.
+      shell: "cat {{ kamailio_dest_directory }}/kamailio/utils/kamctl/postgres/*.sql > /tmp/db_import.sql"
+
+    - name: Create Database.
+      postgresql_db:
+        name:
+        login_host: "{{ dbhost }}"
+        login_user: "{{ dbrootuser }}"
+        login_password: "{{ dbrootpass }}"
+        state: restore
+        target: /tmp/db_import.sql
+
+    - name: Create role.
+      postgresql_user:
+        name: {{ kam_dbuser }}
+        password: {{ kam_dbpass }}
+        db: {{ kam_dbname }}
+        login_host: "{{ dbhost }}"
+        login_user: "{{ dbrootuser }}"
+        login_password: "{{ dbrootpass }}"
+        state: present
