@@ -323,7 +323,6 @@ route[LOCATION] {
         $avp(oexten) = $rU;
         if (!lookup("location")) {
                 $var(rc) = $rc;
-                route(TOVOICEMAIL);
                 t_newtran();
                 switch ($var(rc)) {
                         case -1:

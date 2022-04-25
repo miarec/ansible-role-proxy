@@ -1,6 +1,13 @@
 ---
 # tasks file for proxy
 
+# Include variables and define needed variables.
+- name: Include OS-specific variables.
+  include_vars: "{{ ansible_os_family }}.yml"
+  tags:
+    - kamailio
+    - rtpproxy
+
 # Install Dependencies
 - name: Install Dependencies (RedHat).
   include: prep-RedHat.yml
@@ -43,24 +50,19 @@
 
 # Check if Database is present
 - name: Check is database is present
-   shell: psql postgres://{{ dbrootuser }}:{{ dbrootpass }}@{{ dbhost }}:{{dbport}}/{{ kam_dbname }} -c '\list'     ## not specify database name????
-   register: _db_status
-   failed_when: _dbstatus.rc == 2
+  shell:
+    cmd: psql postgres://{{ dbrootuser }}:{{ dbrootpass }}@{{ dbhost }}:{{dbport}}/{{ dbrootname }} -c '\list' | grep {{ kam_dbname }}
+  register: _db_status
+  failed_when: _db_status.rc == 2
+  changed_when: False
   run_once: true
   tags:
    - kamailio
    - database
 
-# Include variables and define needed variables.
-- name: Include OS-specific variables.
-  include_vars: "{{ ansible_os_family }}.yml"
-  tags:
-    - kamailio
-    - rtpproxy
-
 - name: Configure Databaes
   include: configure_databse.yml
-  when: "{{ kam_dbname }} not in _db_install.stdout"
+  when: "kam_dbname not in _db_status.stdout"
   tags:
     - kamailio
     - database

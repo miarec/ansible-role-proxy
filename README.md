@@ -28,6 +28,7 @@ sipproxy1 public_ip_address=5.6.7.8 private_ip_address=10.0.0.2
 - `dbhost` URL or IP address of postgres instance
 - `dbrootuser` database username, must have privledge to create databases and users
 - `dbrootpass` password for dbroot user
+- `dbrootname` name of root database
 
 These varaibles can be assigned to a group vars
 ```ini
@@ -104,6 +105,7 @@ sipproxy1
 dbhost = database.example.com
 dbrootuser = rootuser
 dbrootpass = secert
+dbrootname = rootdb
 enable_debug = true
 debug_level = 3
 ```
