@@ -22,7 +22,7 @@
     cmd: |
       cat {{ kamailio_dest_directory }}/kamailio/utils/kamctl/postgres/*.sql > /tmp/db_import.sql
       psql postgres://{{ kam_dbuser }}:{{ kam_dbpass }}@{{ dbhost }}:{{ dbport }}/{{ kam_dbname }} -f /tmp/db_import;"
-  when: "kam_dbname not in _db_status.stdout"
+  when: _dbtable_status.stdout.find('dispatcher') != -1
   run_once: true
   notify:
     - restart kamailio

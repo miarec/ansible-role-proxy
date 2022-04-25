@@ -3,6 +3,8 @@
 kamailio_version: 5.5
 
 # database variables
+dbrootuser: 'miarec'
+dbrootname: 'miarecdb'
 dbport: 5432
 kam_dbname: kamailio
 kam_dbuser: kamailio

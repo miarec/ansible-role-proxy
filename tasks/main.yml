@@ -60,20 +60,13 @@
    - kamailio
    - database
 
- - name: Check is Kamailio Database User is present
+- name: Check is Kamailio Database User is present
   shell:
     cmd: psql postgres://{{ dbrootuser }}:{{ dbrootpass }}@{{ dbhost }}:{{dbport}}/{{ dbrootname }} -c '\dx' | grep {{ kam_dbuser }}
   register: _dbuser_status
   failed_when: _dbuser_status.rc == 2
   changed_when: False
   run_once: true
-  tags:
-   - kamailio
-   - database
-
-# Configure Kamailio Database
-- name: Configure Kamailio Database.
-  include: configure_database.yml
   tags:
    - kamailio
    - database
@@ -90,6 +83,13 @@
   when: "not _rtpproxy_install.stat.exists"
   tags:
     - rtpproxy
+
+# Configure Kamailio Database
+- name: Configure Kamailio Database.
+  include: configure_database.yml
+  tags:
+   - kamailio
+   - database
 
 # Generate Configuration files
 - name: Configure Kamailio.
