@@ -64,7 +64,7 @@
   shell:
     cmd: psql postgres://{{ dbrootuser }}:{{ dbrootpass }}@{{ dbhost }}:{{dbport}}/{{ dbrootname }} -c '\du' | grep {{ kam_dbuser }}
   register: _dbuser_status
-  when: "kam_dbname not in _db_status.stdout"
+  when: "kam_dbname in _db_status.stdout"
   failed_when: _dbuser_status.rc == 2
   changed_when: False
   run_once: true
@@ -77,7 +77,7 @@
   shell:
     cmd: psql postgres://{{ kam_dbuser }}:{{ kam_dbpass }}@{{ dbhost }}:{{dbport}}/{{ kam_dbname }} -c '\dt'
   register: _dbtable_status
-  when: "kam_dbname not in _db_status.stdout"
+  when: "kam_dbname in _db_status.stdout and kam_dbuser in _dbuser_status.stdout"
   failed_when: _dbtable_status.rc == 2
   changed_when: False
   run_once: true
