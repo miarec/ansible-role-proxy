@@ -4,26 +4,24 @@
     cmd: psql postgres://{{ dbrootuser }}:{{ dbrootpass }}@{{ dbhost }}:{{ dbport }}/{{ dbrootname }} -c "CREATE DATABASE {{ kam_dbname }};"
   when: "kam_dbname not in _db_status.stdout"
   run_once: true
-  notify:
-    - restart kamailio
+
 
 - name: Create Kamailio User and Grant Permissions
   shell:
     cmd: |
       psql postgres://{{ dbrootuser }}:{{ dbrootpass }}@{{ dbhost }}:{{ dbport }}/{{ dbrootname }} -c "CREATE USER {{ kam_dbuser }} WITH PASSWORD '{{ kam_dbpass }}';"
       psql postgres://{{ dbrootuser }}:{{ dbrootpass }}@{{ dbhost }}:{{ dbport }}/{{ dbrootname }} -c "GRANT ALL PRIVILEGES ON DATABASE {{ kam_dbname }} TO {{ kam_dbuser }};"
-  when: "kam_dbname not in _db_status.stdout or kam_dbuser not in _dbuser_status.stdout"
+  when: "kam_dbname not in _db_status.stdout or kam_dbuser not in _db_user_status.stdout"
   run_once: true
-  notify:
-    - restart kamailio
+
 
 - name: Create Tables in Kamailio Database
   shell:
     cmd: |
+      cat {{ kamailio_dest_directory }}/kamailio/utils/kamctl/postgres/version-create.sql > /tmp/db_import.sql
       cat {{ kamailio_dest_directory }}/kamailio/utils/kamctl/postgres/*.sql > /tmp/db_import.sql
-      psql postgres://{{ kam_dbuser }}:{{ kam_dbpass }}@{{ dbhost }}:{{ dbport }}/{{ kam_dbname }} -f /tmp/db_import;"
-  when: "kam_dbname not in _db_status.stdout or kam_dbuser not in _dbuser_status.stdout or _dbtable_status.stdout.find('dispatcher') != -1"
+      psql postgres://{{ kam_dbuser }}:{{ kam_dbpass }}@{{ dbhost }}:{{ dbport }}/{{ kam_dbname }} -f /tmp/db_import.sql
+  when: "kam_dbname not in _db_status.stdout or _dbtable_status.stdout.find('dispatcher') != -1"
   run_once: true
-  notify:
-    - restart kamailio
+
 

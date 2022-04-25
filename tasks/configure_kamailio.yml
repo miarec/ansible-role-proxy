@@ -33,6 +33,7 @@
     mode: 0644
   notify:
     - restart kamailio
+    - restart rtpproxy
 
 # Create SystemD Service
 - name: Create Kamailio SystemD Service
@@ -44,3 +45,4 @@
     mode: 0644
   notify:
     - restart kamailio
+    - restart rtpproxy
