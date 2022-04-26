@@ -70,4 +70,5 @@
     PGUSER: "{{ kam_dbuser }}"
     PGPASSWORD: "{{ kam_dbpass }}"
     PGDATABASE: "{{ kam_dbname }}"
+  when: dispatcher_destination.changed
 
