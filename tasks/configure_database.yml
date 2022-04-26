@@ -1,58 +1,58 @@
 ---
-- name: Create Kamailio Database.
-  postgresql_db:
-    name: "{{ db_kam }}"
-    state: present
-    login_user: "{{ dbuser_root }}"
-  environment:
-    PGHOST: "{{ dbhost }}"
-    PGPORT: "{{ dbport }}"
-    PGPASSWORD: "{{ dbpass_root }}"
-    PGDATABASE: "{{ db_root }}"
-  run_once: true
-  register: _kamailio_database
+# - name: Create Kamailio Database.
+#   postgresql_db:
+#     name: "{{ db_kam }}"
+#     state: present
+#     login_user: "{{ dbuser_root }}"
+#   environment:
+#     PGHOST: "{{ dbhost }}"
+#     PGPORT: "{{ dbport }}"
+#     PGPASSWORD: "{{ dbpass_root }}"
+#     PGDATABASE: "{{ db_root }}"
+#   run_once: true
+#   register: _kamailio_database
 
-- name: Create Kamailio user.
-  postgresql_user:
-    name: "{{ dbuser_kam }}"
-    password: "{{ dbpass_kam }}"
-    login_user: "{{ dbuser_root }}"
-  environment:
-    PGHOST: "{{ dbhost }}"
-    PGPORT: "{{ dbport }}"
-    PGPASSWORD: "{{ dbpass_root }}"
-    PGDATABASE: "{{ db_root }}"
-  run_once: true
+# - name: Create Kamailio user.
+#   postgresql_user:
+#     name: "{{ dbuser_kam }}"
+#     password: "{{ dbpass_kam }}"
+#     login_user: "{{ dbuser_root }}"
+#   environment:
+#     PGHOST: "{{ dbhost }}"
+#     PGPORT: "{{ dbport }}"
+#     PGPASSWORD: "{{ dbpass_root }}"
+#     PGDATABASE: "{{ db_root }}"
+#   run_once: true
 
 
-- name: Create Tables in Kamailio Database
-  shell:
-    cmd: |
-      cat {{ kamailio_dest_directory }}/kamailio/utils/kamctl/postgres/version-create.sql > /tmp/db_import.sql
-      cat {{ kamailio_dest_directory }}/kamailio/utils/kamctl/postgres/*.sql > /tmp/db_import.sql
-      psql postgres://{{ dbuser_kam }}:{{ dbpass_kam }}@{{ dbhost }}:{{ dbport }}/{{ db_kam }} -f /tmp/db_import.sql
-  environment:
-    PGHOST: "{{ dbhost }}"
-    PGPORT: "{{ dbport }}"
-    PGUSER: "{{ dbuser_kam }}"
-    PGPASSWORD: "{{ dbpass_kam }}"
-    PGDATABASE: "{{ db_kam }}"
-  when: _kamailio_database.changed
-  run_once: true
+# - name: Create Tables in Kamailio Database
+#   shell:
+#     cmd: |
+#       cat {{ kamailio_dest_directory }}/kamailio/utils/kamctl/postgres/version-create.sql > /tmp/db_import.sql
+#       cat {{ kamailio_dest_directory }}/kamailio/utils/kamctl/postgres/*.sql > /tmp/db_import.sql
+#       psql postgres://{{ dbuser_kam }}:{{ dbpass_kam }}@{{ dbhost }}:{{ dbport }}/{{ db_kam }} -f /tmp/db_import.sql
+#   environment:
+#     PGHOST: "{{ dbhost }}"
+#     PGPORT: "{{ dbport }}"
+#     PGUSER: "{{ dbuser_kam }}"
+#     PGPASSWORD: "{{ dbpass_kam }}"
+#     PGDATABASE: "{{ db_kam }}"
+#   when: _kamailio_database.changed
+#   run_once: true
 
-- name: Grant all privledges to user:{{ dbuser_kam }} on database:{{ db_kam }}.
-  postgresql_privs:
-    db: "{{ db_kam }}"
-    privs: ALL
-    type: database
-    role: "{{ dbuser_kam }}"
-    login_user: "{{ dbuser_root }}"
-  environment:
-    PGHOST: "{{ dbhost }}"
-    PGPORT: "{{ dbport }}"
-    PGPASSWORD: "{{ dbpass_root }}"
-    PGDATABASE: "{{ db_root }}"
-  run_once: true
+# - name: Grant all privledges to user:{{ dbuser_kam }} on database:{{ db_kam }}.
+#   postgresql_privs:
+#     db: "{{ db_kam }}"
+#     privs: ALL
+#     type: database
+#     role: "{{ dbuser_kam }}"
+#     login_user: "{{ dbuser_root }}"
+#   environment:
+#     PGHOST: "{{ dbhost }}"
+#     PGPORT: "{{ dbport }}"
+#     PGPASSWORD: "{{ dbpass_root }}"
+#     PGDATABASE: "{{ db_root }}"
+#   run_once: true
 
 - name: Add Recorders as dispatcher destinations.
   command: |

@@ -8,14 +8,6 @@
     group: root
     mode: 0644
 
-# Run kamdbctl to setup kamailio database
-- name: Create Database
-  become: true
-  shell: "/usr/local/sbin/kamdbctl create {{ db_kam }}"
-  run_once: true
-
-
-
 #Create default config file
 - name: Create Kamailo Config
   template:
