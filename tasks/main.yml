@@ -73,11 +73,11 @@
     - rtpproxy
 
 # Configure Kamailio Database
-- name: Configure Kamailio Database.
-  include: configure_database.yml
-  tags:
-   - kamailio
-   - database
+# - name: Configure Kamailio Database.
+#   include: configure_database.yml
+#   tags:
+#    - kamailio
+#    - database
 
 # Generate Configuration files
 - name: Configure Kamailio.
