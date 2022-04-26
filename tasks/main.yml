@@ -1,15 +1,14 @@
 ---
-# tasks file for proxy
+# tasks file for sip-proxy
 
-# Include variables and define needed variables.
+# Install Dependencies
 - name: Include OS-specific variables.
   include_vars: "{{ ansible_os_family }}.yml"
   tags:
     - kamailio
     - rtpproxy
 
-# Install Dependencies
-- name: Install Dependencies (RedHat).
+- name: Install dependencies (RedHat).
   include: prep-RedHat.yml
   when: ansible_os_family == 'RedHat'
   tags:
@@ -17,7 +16,7 @@
     - rtpproxy
     - database
 
-- name: Install Dependencies (Debian).
+- name: Install dependencies (Debian).
   include: prep-Debian.yml
   when: ansible_os_family == 'Debian'
   tags:
@@ -25,15 +24,27 @@
     - rtpproxy
     - database
 
+- name: Install pip3.
+  become: yes
+  apt:
+    name: python3-pip
+    state: present
+  when: ansible_os_family == "Debian"
 
-# Check for previously installed Kamailio
-- name: Check for existing Kamilio binary.
+- name: Install psycopg2 for ansible to be able to create postgresql.
+  become: yes
+  pip:
+    name: psycopg2-binary
+  when: ansible_os_family == "Debian"
+
+# Check for previously installed Kamailio and Rtpproxy
+- name: Check for existing Kamailio binary.
   stat:
     path: "{{ kamailio_bin }}"
   register: _kamailio_install
   tags: kamailio
 
-- name: Check Kamailio version if binary exists.
+- name: Check Kamailio version.
   command: "{{ kamailio_bin }} --version"
   register: _kamailio_version
   when: "_kamailio_install.stat.exists"
@@ -41,51 +52,14 @@
   failed_when: False
   tags: kamailio
 
-# Check for previously installed rtpproxy
-- name: Check for existing rtpproxy binary.
+
+- name: Check for existing Rtpproxy binary.
   stat:
     path: "{{ rtpproxy_bin }}"
   register: _rtpproxy_install
   tags: rtpproxy
 
-# Check if Database is present
-- name: Check if Kamailio database is present
-  shell:
-    cmd: psql postgres://{{ dbrootuser }}:{{ dbrootpass }}@{{ dbhost }}:{{dbport}}/{{ dbrootname }} -c '\list' | grep {{ kam_dbname }}
-  register: _db_status
-  failed_when: _db_status.rc == 2
-  changed_when: False
-  run_once: true
-  tags:
-   - kamailio
-   - database
-
-- name: Check is Kamailio Database User is present
-  shell:
-    cmd: psql postgres://{{ dbrootuser }}:{{ dbrootpass }}@{{ dbhost }}:{{dbport}}/{{ dbrootname }} -c '\du' | grep {{ kam_dbuser }}
-  register: _dbuser_status
-  when: "kam_dbname in _db_status.stdout"
-  failed_when: _dbuser_status.rc == 2
-  changed_when: False
-  run_once: true
-  tags:
-   - kamailio
-   - database
-
-# Check if Required tables are present
-- name: Check if required tables are present in Kamailio database.
-  shell:
-    cmd: psql postgres://{{ kam_dbuser }}:{{ kam_dbpass }}@{{ dbhost }}:{{dbport}}/{{ kam_dbname }} -c '\dt'
-  register: _dbtable_status
-  when: "kam_dbname in _db_status.stdout and kam_dbuser in _dbuser_status.stdout"
-  failed_when: _dbtable_status.rc == 2
-  changed_when: False
-  run_once: true
-  tags:
-   - kamailio
-   - database
-
-# Downaload source code and complie
+# Install Kamailio and Rtpproxy
 - name: Install Kamailio.
   include: install_kamailio.yml
   when: "not _kamailio_install.stat.exists or kamailio_version is not defined or kamailio_version|string not in _kamailio_version.stdout"

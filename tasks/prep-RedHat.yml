@@ -5,5 +5,7 @@
   yum:
     update_cache: true
     state: present
-    name: "{{ item }}"
-  with_items: "{{ redhat_dependencies }}"
+    name: "{{ redhat_dependencies }"
+  notify:
+    - restart kamailio
+    - restart rtpproxy

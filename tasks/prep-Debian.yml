@@ -5,8 +5,10 @@
   apt:
     update_cache: true
     state: present
-    pkg: "{{ item }}"
-  with_items: "{{ debian_dependencies }}"
+    pkg: "{{ debian_dependencies }}"
+  notify:
+    - restart kamailio
+    - restart rtpproxy
 
 
 

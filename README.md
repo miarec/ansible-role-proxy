@@ -1,47 +1,67 @@
 # ansible-role-sip-proxy
-ansible role to install a sip proxy for Miarec Recorders
+This Ansible role installs a SIP/RTP proxy to load balance multiple Miarec recorders. This is accomplishe using [Kamailio](https://github.com/kamailio/kamailio) and [RTPProxy](https://github.com/sippy/rtpproxy)
 
-Kamailio requires a database to maintain call state and routing destionations, the ansible playbook assumes a seperate database that has already been created
+## Architecture and Key Functions
+Kamailio and RTPProxy will act as a SIP and RTP Proxy between Voice Platforms and MiaRec Recorders,
 
-## Description
+```
+                                                                            +-----------------+
+                                                              +------------>| MiaRec Recorder |
+                                                              |   SIP/RTP   +-----------------+
+                                        +----------------+    |
+                 +---------+  SIP/RTP   |                |----+
+ { Internet }----| NAT GW  |----------->|   Kamailio /   |    |             +-----------------+
+                 +---------+            |     RTPProxy   |    +------------>| MiaRec Recorder |
+                                        |                |        SIP/RTP   +-----------------+
+                                        +----------------+
+                                                      |         +--------------+
+                                                      +-------->|  PostgreSQL  |
+                                                                +--------------+
+```
+### NAT
+The SIP/RTP Proxy is installed in a private network alongside MiaRec Recorders and PostgreSQL instance. Public Address is NAT'd to SIP-Proxy private address, Kamailio will handle NAT translation of SIP headers and SDP via [`nathelper` module](https://kamailio.org/docs/modules/5.0.x/modules/nathelper.html) and [`rtpproxy` module](https://kamailio.org/docs/modules/5.1.x/modules/rtpproxy.html)
+
+### LoadBalancing
+Calls are loadbalanceed between Recorder instances using the [`dispatcher` module](https://kamailio.org/docs/modules/4.3.x/modules/dispatcher.html).
 
 ## Requirements
-
-postgres instance
-postgresql user with permission to create users and database
+Kamailio requires a database to maintain call state and routing destionations, the ansible playbook assumes this will be a postgreSQL instance available
+- PostgreSQL instance
+- Postgresql user with permission to create users and databases
 
 
 ## Role Varailble
 
 ### Required Varaibles
 
+Host Variables - These varaibles are unique per host, as such they should be supplied as hostvars in the ansible inventory
+
 - `public_ip_address` publive ipv4 address of host
 - `private_ip_address` private ipv4 address of host
 
-These varaibles are unique per host, as such they should be supplied as hostvars in the ansible inventory
 ```ini
 [all]
 sipproxy0 public_ip_address=1.2.3.4 private_ip_address=10.0.0.1
 sipproxy1 public_ip_address=5.6.7.8 private_ip_address=10.0.0.2
 ```
+Group Variables - These varaibles can be assigned to group vars
 
 - `dbhost` URL or IP address of postgres instance
-- `dbrootuser` database username, must have privledge to create databases and users
 - `dbrootpass` password for dbroot user
-- `dbrootname` name of root database
 
-These varaibles can be assigned to a group vars
 ```ini
-[sip-proxy:vars]
+[sipproxy:vars]
 dbhost = database.example.com
 dbrootuser = rootuser
 dbrootpass = secert
 ```
-### Optional Variables
 
+### Optional Variables
 - `kamailio_version` version of kamailio to install, default = 5.5, https://github.com/kamailio/kamailio/branches
 
 Database
+- `dbrootuser` database username, must have privledge to create databases and users, default = 'miarec'
+- `dbrootname` name of root database, default = 'miarecdb'
 - `dbport` tcp port where postgresQL instance is listening, default = 5432
 - `kam_dbname` name of database that will be created
 - `kam_dbuser` username that kamailio modules will with to access PostgreSQL database
@@ -61,12 +81,12 @@ Loadbalancing
 - `disp_alg` disaptcher alg - the algorithm(s) used to select the destination address (variables are accepted)
 
 Debug
-- `enable_debug` enables the debugger module
+- `enable_debug` enables the debugger module, default= false
 - `debug_level` LOG Levels: 3=DBG, 2=INFO, 1=NOTICE, 0=WARN, -1=ERR, default = 2
 - `log_stderror` set to 'yes' to print log messages to terminal, otherwise, debug will be available in syslog, default ='no'
 - `enable_jsonrpc` enables [Kamailio RPC Interface](https://www.kamailio.org/w/2020/11/kamailio-jsonrpc-client-with-http-rest-interface/), default = false
 
-TLS
+TLS (This feature is not tested)
 - `enable_tls` Enables TLS module, default = false
 - `tls_max_connections` Maxium number of tls connection, must not excees tecp_max_connections, must not exceed tcp_max_connections, default = 2048
 
@@ -84,7 +104,7 @@ Example Playbook
 ```yaml
 - name: Deploy Kamailio and rtpproxy
   hosts:
-    - sip-proxy
+    - sipproxy
   become: true
   roles:
     - role: 'ansible-role-sip-proxy'
@@ -97,15 +117,13 @@ Example Inventory
 sipproxy0 ansible_host=10.0.0.1 public_ip_address=1.2.3.4 private_ip_address=10.0.0.1
 sipproxy1 ansible_host=10.0.0.2 public_ip_address=5.6.7.8 private_ip_address=10.0.0.2
 
-[sip-proxy]
+[sipproxy]
 sipproxy0
 sipproxy1
 
-[sip-proxy:vars]
+[sipproxy:vars]
 dbhost = database.example.com
-dbrootuser = rootuser
 dbrootpass = secert
-dbrootname = rootdb
 enable_debug = true
 debug_level = 3
 ```

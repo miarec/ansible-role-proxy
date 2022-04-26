@@ -4,15 +4,17 @@
   group:
     name: kamailio
     state: present
+    system: true
 
-- name: Create Kamailio user
+- name: Create the Kamailio user.
   user:
     name: kamailio
+    groups: kamailio
+    append: true
+    shell: /usr/sbin/nologin
     system: true
-    shell: "/usr/sbin/nologin"
-    group: kamailio
-    move_home: yes
-    home: /var/run/kamailio
+    createhome: false
+    home: /
 
 # GIT source code
 - name: Create directory for source code
@@ -36,6 +38,8 @@
     - "cd {{ kamailio_dest_directory }}/kamailio && make include_modules='db_postgres' cfg"
     - "cd {{ kamailio_dest_directory }}/kamailio && make all"
     - "cd {{ kamailio_dest_directory }}/kamailio && make install"
+  notify:
+    - restart kamailio
 
 
 
