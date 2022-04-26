@@ -47,25 +47,26 @@ sipproxy1 public_ip_address=5.6.7.8 private_ip_address=10.0.0.2
 Group Variables - These varaibles can be assigned to group vars
 
 - `dbhost` URL or IP address of postgres instance
-- `dbrootpass` password for dbroot user
+- `dbuser_root` root user with privledge to create user and databases
+- `dbpass_root` password for `dbuser_root`
 
 ```ini
 [sipproxy:vars]
 dbhost = database.example.com
-dbrootuser = rootuser
-dbrootpass = secert
+dbuser_root = rootuser
+dbpass_root = secert
 ```
 
 ### Optional Variables
 - `kamailio_version` version of kamailio to install, default = 5.5, https://github.com/kamailio/kamailio/branches
 
 Database
-- `dbrootuser` database username, must have privledge to create databases and users, default = 'miarec'
-- `dbrootname` name of root database, default = 'miarecdb'
+- `db_root` name of root database, default = 'miarecdb'
+- `dbuser_root` database username, must have privledge to create databases and users, default = 'miarec'
 - `dbport` tcp port where postgresQL instance is listening, default = 5432
-- `kam_dbname` name of database that will be created
-- `kam_dbuser` username that kamailio modules will with to access PostgreSQL database
-- `kam_dbpass` password for `kam_dbuser`
+- `db_kam` name of database that will be created
+- `dbuser_kam` username that kamailio modules will with to access PostgreSQL database
+- `dbpass_kam` password for `dbuser_kam`
 
 Connectivty
 - `sip_tcp_port` tcp port that will be used for SIP signaling, default = 5080

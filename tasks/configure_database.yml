@@ -1,14 +1,14 @@
 ---
 - name: Create Kamailio Database.
   postgresql_db:
-    name: "{{ kam_dbname }}"
+    name: "{{ db_kam }}"
     state: present
-    login_user: "{{ dbrootuser }}"
+    login_user: "{{ dbuser_root }}"
   environment:
     PGHOST: "{{ dbhost }}"
     PGPORT: "{{ dbport }}"
-    PGPASSWORD: "{{ dbrootpass }}"
-    PGDATABASE: "{{ dbrootname }}"
+    PGPASSWORD: "{{ dbpass_root }}"
+    PGDATABASE: "{{ db_root }}"
   run_once: true
   register: _kamailio_database
 
@@ -17,40 +17,40 @@
     cmd: |
       cat {{ kamailio_dest_directory }}/kamailio/utils/kamctl/postgres/version-create.sql > /tmp/db_import.sql
       cat {{ kamailio_dest_directory }}/kamailio/utils/kamctl/postgres/*.sql > /tmp/db_import.sql
-      psql postgres://{{ kam_dbuser }}:{{ kam_dbpass }}@{{ dbhost }}:{{ dbport }}/{{ kam_dbname }} -f /tmp/db_import.sql
+      psql postgres://{{ dbuser_kam }}:{{ dbpass_kam }}@{{ dbhost }}:{{ dbport }}/{{ db_kam }} -f /tmp/db_import.sql
   environment:
     PGHOST: "{{ dbhost }}"
     PGPORT: "{{ dbport }}"
-    PGUSER: "{{ kam_dbuser }}"
-    PGPASSWORD: "{{ kam_dbpass }}"
-    PGDATABASE: "{{ kam_dbname }}"
+    PGUSER: "{{ dbuser_kam }}"
+    PGPASSWORD: "{{ dbpass_kam }}"
+    PGDATABASE: "{{ db_kam }}"
   when: _kamailio_database.changed
   run_once: true
 
 - name: Create Kamailio user.
   postgresql_user:
-    name: "{{ kam_dbuser }}"
-    password: "{{ kam_dbpass }}"
-    login_user: "{{ dbrootuser }}"
+    name: "{{ dbuser_kam }}"
+    password: "{{ dbpass_kam }}"
+    login_user: "{{ dbuser_root }}"
   environment:
     PGHOST: "{{ dbhost }}"
     PGPORT: "{{ dbport }}"
-    PGPASSWORD: "{{ dbrootpass }}"
-    PGDATABASE: "{{ dbrootname }}"
+    PGPASSWORD: "{{ dbpass_root }}"
+    PGDATABASE: "{{ db_root }}"
   run_once: true
 
-- name: Grant all privledges to user:{{ kam_db_user }} on database:{{ kam_dbname }}.
+- name: Grant all privledges to user:{{ dbuser_kam }} on database:{{ db_kam }}.
   postgresql_privs:
-    db: "{{ kam_dbname }}"
+    db: "{{ db_kam }}"
     privs: ALL
     type: database
-    role: "{{kam_dbuser}}"
-    login_user: "{{ dbrootuser }}"
+    role: "{{ dbuser_kam }}"
+    login_user: "{{ dbuser_root }}"
   environment:
     PGHOST: "{{ dbhost }}"
     PGPORT: "{{ dbport }}"
-    PGPASSWORD: "{{ dbrootpass }}"
-    PGDATABASE: "{{ dbrootname }}"
+    PGPASSWORD: "{{ dbpass_root }}"
+    PGDATABASE: "{{ db_root }}"
   run_once: true
 
 - name: Add Recorders as dispatcher destinations.
@@ -67,8 +67,8 @@
   environment:
     PGHOST: "{{ dbhost }}"
     PGPORT: "{{ dbport }}"
-    PGUSER: "{{ kam_dbuser }}"
-    PGPASSWORD: "{{ kam_dbpass }}"
-    PGDATABASE: "{{ kam_dbname }}"
+    PGUSER: "{{ dbuser_kam }}"
+    PGPASSWORD: "{{ dbpass_kam }}"
+    PGDATABASE: "{{ db_kam }}"
   when: dispatcher_destination.changed
 
