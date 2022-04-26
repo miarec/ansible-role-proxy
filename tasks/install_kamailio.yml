@@ -17,13 +17,13 @@
     home: /
 
 # GIT source code
-- name: Create directory for source code
+- name: Create directory for Kamailio source code.
   file:
     path: "{{ kamailio_dest_directory }}"
     state: directory
     mode: 0755
 
-- name: Git clone Kamailio
+- name: Git clone Kamailio repo.
   git:
     repo: git://git.kamailio.org/kamailio
     dest: "{{ kamailio_dest_directory }}/kamailio"
@@ -32,7 +32,7 @@
     version: origin/{{ kamailio_version }}
 
 # Compile Build Files
-- name: Compile Build Files
+- name: Compile Build Files - Kamailio
   shell: "{{ item }}"
   with_items:
     - "cd {{ kamailio_dest_directory }}/kamailio && make include_modules='db_postgres' cfg"

@@ -3,12 +3,12 @@
 kamailio_version: 5.5
 
 # database variables
-dbrootuser: 'miarec'
-dbrootname: 'miarecdb'
+dbuser_root: 'miarec'
+db_root: 'miarecdb'
 dbport: 5432
-kam_dbname: kamailio
-kam_dbuser: kamailio
-kam_dbpass: kamailiorw
+db_kam: kamailio
+dbuser_kam: kamailio
+dbpass_kam: kamailiorw
 
 # Conenction Variables
 sip_tcp_port: 5080
