@@ -12,6 +12,19 @@
   run_once: true
   register: _kamailio_database
 
+- name: Create Kamailio user.
+  postgresql_user:
+    name: "{{ dbuser_kam }}"
+    password: "{{ dbpass_kam }}"
+    login_user: "{{ dbuser_root }}"
+  environment:
+    PGHOST: "{{ dbhost }}"
+    PGPORT: "{{ dbport }}"
+    PGPASSWORD: "{{ dbpass_root }}"
+    PGDATABASE: "{{ db_root }}"
+  run_once: true
+
+
 - name: Create Tables in Kamailio Database
   shell:
     cmd: |
@@ -25,18 +38,6 @@
     PGPASSWORD: "{{ dbpass_kam }}"
     PGDATABASE: "{{ db_kam }}"
   when: _kamailio_database.changed
-  run_once: true
-
-- name: Create Kamailio user.
-  postgresql_user:
-    name: "{{ dbuser_kam }}"
-    password: "{{ dbpass_kam }}"
-    login_user: "{{ dbuser_root }}"
-  environment:
-    PGHOST: "{{ dbhost }}"
-    PGPORT: "{{ dbport }}"
-    PGPASSWORD: "{{ dbpass_root }}"
-    PGDATABASE: "{{ db_root }}"
   run_once: true
 
 - name: Grant all privledges to user:{{ dbuser_kam }} on database:{{ db_kam }}.
@@ -59,7 +60,7 @@
     VALUES ('{{ index }}', '{{ disp_set }}', 'sip:{{ item.ip }}:{{ item.port }};transport={{ item.protocol }}', '{{ item.flags| default(0) }}', '{{ item.priority | default(0) }}', '{{ item.attrs | default('') }}', '{{ item.name }}')
     ON CONFLICT (id)
     DO UPDATE SET
-    id={{ index }}, setid={{ disp_set }}, destination='sip:{{ item.ip }}:{{ item.port }};transport={{ item.protocol }}', flags={{ item.flags| default(0) }}, priority={{ item.priority | default(0) }}, attrs='{{ item.attrs | default=('') }}'', description='{{ item.name }}';"
+    id={{ index }}, setid={{ disp_set }}, destination='sip:{{ item.ip }}:{{ item.port }};transport={{ item.protocol }}', flags={{ item.flags| default(0) }}, priority={{ item.priority | default(0) }}, attrs='{{ item.attrs | default('') }}', description='{{ item.name }}';"
   run_once: true
   loop: "{{ disptacher_destinations }}"
   loop_control:
@@ -70,5 +71,5 @@
     PGUSER: "{{ dbuser_kam }}"
     PGPASSWORD: "{{ dbpass_kam }}"
     PGDATABASE: "{{ db_kam }}"
-  when: dispatcher_destination.changed
+#  when: dispatcher_destination.changed
 
