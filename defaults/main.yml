@@ -46,15 +46,3 @@ ipban_expire: 300   # Time in seconds ip will be stored in ipban table
 
 
 enable_NAT_keepalive: false # It might be required to NAT SIP OPTIONS messages depending on archetecture
-
-dispatcher_port: 5060
-dispatcher_protocol: 'tcp'
-disptacher_destinations:
- - name: rec0.dop28
-   ip: 10.0.1.0
-   port: 5080
-   protocol: tcp
- - name: rec1.dop28
-   ip: 10.0.2.0
-   port: 5060
-   protocol: udp

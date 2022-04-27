@@ -24,18 +24,18 @@
     - rtpproxy
     - database
 
-- name: Install pip3.
-  become: yes
-  apt:
-    name: python3-pip
-    state: present
-  when: ansible_os_family == "Debian"
+# - name: Install pip3.
+#   become: yes
+#   apt:
+#     name: python3-pip
+#     state: present
+#   when: ansible_os_family == "Debian"
 
-- name: Install psycopg2 for ansible to be able to create postgresql.
-  become: yes
-  pip:
-    name: psycopg2-binary
-  when: ansible_os_family == "Debian"
+# - name: Install psycopg2 for ansible to be able to create postgresql.
+#   become: yes
+#   pip:
+#     name: psycopg2-binary
+#   when: ansible_os_family == "Debian"
 
 # Check for previously installed Kamailio and Rtpproxy
 - name: Check for existing Kamailio binary.
@@ -72,13 +72,6 @@
   tags:
     - rtpproxy
 
-# Configure Kamailio Database
-- name: Configure Kamailio Database.
-  include: configure_database.yml
-  tags:
-   - kamailio
-   - database
-
 # Generate Configuration files
 - name: Configure Kamailio.
   include: configure_kamailio.yml
@@ -89,3 +82,30 @@
   include: configure_rtpproxy.yml
   tags:
     - rtpproxy
+
+# # Still need to make idempotent
+# - name: Add Recorders as dispatcher destinations.
+#   command: |
+#     psql -c "INSERT INTO dispatcher
+#     VALUES ('{{ index }}', '{{ disp_set }}', 'sip:{{ item.ip }}:{{ item.port }};transport={{ item.protocol }}', '{{ item.flags }}', '{{ item.priority }}', '{{ item.attrs }}', '{{ item.name }}')
+#     ON CONFLICT (id)
+#     DO UPDATE SET
+#     id={{ index }}, setid={{ disp_set }}, destination='sip:{{ item.ip }}:{{ item.port }};transport={{ item.protocol }}', flags='{{ item.flags }}', priority='{{ item.priority }}', attrs='{{ item.attrs }}', description='{{ item.name }}';"
+#   run_once: true
+#   loop: "{{ dispatcher_destinations }}"
+#   loop_control:
+#     index_var: index
+#   environment:
+#     PGHOST: "{{ dbhost }}"
+#     PGPORT: "{{ dbport }}"
+#     PGUSER: "{{ dbuser_kam }}"
+#     PGPASSWORD: "{{ dbpass_kam }}"
+#     PGDATABASE: "{{ db_kam }}"
+
+- name: Create Dispatcher SQL script.
+  template:
+    src: dispatcher-list.sql.j2
+    dest: "/usr/local/etc/kamailio/dispatcher.list.sql"
+    owner: root
+    group: root
+    mode: 0644

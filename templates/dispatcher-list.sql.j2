@@ -1,0 +1,5 @@
+%{ for index, name, ip, port, protocol, flags, priority, attrs in dispatcher_destinations }
+INSERT INTO dispatcher VALUES ('${index}', '${disp_set}', 'sip:${ip}:${port};transport=${protocol}', '${flags}', '${priority}', '${attrs}', '${name}')
+ON CONFLICT (id) DO
+UPDATE SET id=${index}, setid=${disp_set}, destination='sip:${ip}:${port};transport=${protocol}', flags='${flags}', priority='${priority}', attrs='${attrs}', description='${name}';
+%{ endfor }

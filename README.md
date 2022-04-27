@@ -60,7 +60,7 @@ dbpass_root = secert
 ### Optional Variables
 - `kamailio_version` version of kamailio to install, default = 5.5, https://github.com/kamailio/kamailio/branches
 
-Database
+#### Database
 - `db_root` name of root database, default = 'miarecdb'
 - `dbuser_root` database username, must have privledge to create databases and users, default = 'miarec'
 - `dbport` tcp port where postgresQL instance is listening, default = 5432
@@ -68,7 +68,7 @@ Database
 - `dbuser_kam` username that kamailio modules will with to access PostgreSQL database
 - `dbpass_kam` password for `dbuser_kam`
 
-Connectivty
+#### Connectivty
 - `sip_tcp_port` tcp port that will be used for SIP signaling, default = 5080
 - `sip_udp_port` udp port that will be used for SIP signaling, default = 5080
 - `rtp_start` starting UDP port for RTP range, default = 20000
@@ -77,9 +77,32 @@ Connectivty
 - `tcp_connection_lifetime` Lifetime in seconds for TCP sessions. TCP sessions which are inactive for longer than tcp_connection_lifetime will be closed by Kamailio, default = 3605
 - `enable_NAT_keepalive` It might be required for SIP OPTIONS messages to go through NAT depending on archetecture, if so this will need to be enabled to accuratly rewrite OPTION messages, default = false
 
-Loadbalancing
+#### Loadbalancing
 - `disp_set` dispatcher set - a partition name followed by colon and an id of the set or a list of sets from where to pick up destination address
 - `disp_alg` disaptcher alg - the algorithm(s) used to select the destination address (variables are accepted)
+
+Recorder host vars for loadbalancing
+
+the following varaibles apply to individual recorder hosts and effect how the sip proxy will interact with them
+- `siprec_port` poort recorder will be listening on, default = 5080
+- `siprec_protocol` tcp or udp, default = tcp
+
+[documenation here](https://kamailio.org/docs/modules/4.3.x/modules/dispatcher.html#idp51005116)
+- `siprec_flags` Various flags that affect dispatcher's behaviour, default = 0
+- `siprec_priority` sets the priority in destination list (based on it is done the initial ordering inside the set), default = 0
+- `siprec_attrs` extra fields in form of name1=value1;...;nameN=valueN., default = ''
+
+Example
+```ini
+[all]
+rec0.example siprec_port=5060 siprec_protocol=udp siprec_attrs='weight=60' private_ip_address=10.0.0.10
+rec1.example siprec_attrs="weight=40" private_ip_address=10.0.0.11
+```
+
+result:
+
+- rec0 would recieve siprec on udp:5060 and recieve 60% of calls
+- rec1 would recieve siprec on tcp:5080 and recieve 40% of calls
 
 Debug
 - `enable_debug` enables the debugger module, default= false
@@ -99,17 +122,34 @@ Antiflood
 - `ipban_expire` Time in seconds ip will be stored in ipban table, default = 300
 
 
-## Example
 
+
+## Example
 Example Playbook
 ```yaml
-- name: Deploy Kamailio and rtpproxy
+- name: Deploy Kamailio and Rtpproxy.
   hosts:
     - sipproxy
   become: true
+  pre_tasks:
+    - set_fact:
+        tmp_dest:
+          name: "{{ hostvars[item].inventory_hostname }}"
+          ip: "{{ hostvars[item].private_ip_address }}"
+          port: "{{ hostvars[item].siprec_port | default('5080') }}"
+          protocol: "{{ hostvars[item].siprec_protocol | default('tcp') }}"
+          flags: "{{ hostvars[item].siprec_flags | default('0') }}"
+          priority: "{{ hostvars[item].siprec_priority | default('0') }}"
+          attrs: "{{ hostvars[item].siprec_attrs | default('') }}"
+      with_items: "{{ groups.recorder }}"
+      register: _tmp_dispatch_dest
+
+    - set_fact:
+        dispatcher_destinations: "{{ _tmp_dispatch_dest.results | selectattr('ansible_facts', 'defined') | map(attribute='ansible_facts.tmp_dest') | list }}"
+
   roles:
     - role: 'ansible-role-sip-proxy'
-  tags: 'sip-proxy'
+  tags: 'sipproxy'
 ```
 
 Example Inventory
