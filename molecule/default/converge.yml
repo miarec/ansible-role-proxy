@@ -1,0 +1,27 @@
+
+---
+- name: Install PostgreSQL
+  hosts: all
+  vars_files:
+    - vars/db.yml
+  pre_tasks:
+    - name: Install pip3
+      become: yes
+      apt: name=python3-pip state=present update_cache=true
+      when: ansible_os_family == "Debian"
+
+    - name: Install psycopg2 for ansible to be able to create postgresql users
+      become: yes
+      pip: name=psycopg2-binary
+      when: ansible_os_family == "Debian"
+  roles:
+    role: 'postgresql'
+
+- name: Converge
+  hosts: all
+  become: true
+  var_files:
+   - var/sipproxy.yml
+
+  roles:
+    - role: ansible-role-sip-proxy
