@@ -12,5 +12,5 @@ dbhost: "localhost"
 dbuser_root: "miarec"
 dbpass_root: "password"
 
-private_ip_address: "10.0.0.1"
+private_ip_address: "127.0.0.0"
 public_ip_address: "1.2.3.4"
