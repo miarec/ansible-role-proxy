@@ -24,19 +24,6 @@
     - rtpproxy
     - database
 
-# - name: Install pip3.
-#   become: yes
-#   apt:
-#     name: python3-pip
-#     state: present
-#   when: ansible_os_family == "Debian"
-
-# - name: Install psycopg2 for ansible to be able to create postgresql.
-#   become: yes
-#   pip:
-#     name: psycopg2-binary
-#   when: ansible_os_family == "Debian"
-
 # Check for previously installed Kamailio and Rtpproxy
 - name: Check for existing Kamailio binary.
   stat:
@@ -109,3 +96,16 @@
     owner: root
     group: root
     mode: 0644
+  register: _disptacher_destinations
+
+- name: Update dispatcher table.
+  postgresql_query:
+    db: "{{ db_kam }}"
+    login_host: "{{ dbhost }}"
+    port: "{{ dbport }}"
+    login_user: "{{ dbuser_kam }}"
+    login_password: "{{ dbpass_kam }}"
+    path_to_script: "/usr/local/etc/kamailio/dispatcher.list.sql"
+  when: _dispatcher_destinations.changed
+  notify:
+   - dispatcher

@@ -13,3 +13,7 @@
     daemon_reload: true
     name: rtpproxy
     state: restarted
+
+- name: Reload dispatcher module
+  become: true
+  shell: "kamctl dispatcher reload"
