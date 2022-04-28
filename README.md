@@ -1,5 +1,5 @@
 # ansible-role-sip-proxy
-This Ansible role installs a SIP/RTP proxy to load balance multiple Miarec recorders. This is accomplishe using [Kamailio](https://github.com/kamailio/kamailio) and [RTPProxy](https://github.com/sippy/rtpproxy)
+This Ansible role installs a SIP/RTP proxy to load balance multiple Miarec recorders. This is accomplished using [Kamailio](https://github.com/kamailio/kamailio) and [RTPProxy](https://github.com/sippy/rtpproxy)
 
 ## Requirements
 Kamailio requires a database to maintain call state and routing destionations, the ansible playbook assumes this will be a postgreSQL instance available
@@ -24,16 +24,22 @@ Kamailio and RTPProxy will act as a SIP and RTP Proxy between Voice Platforms an
                                                                 +--------------+
 ```
 ### NAT
-The SIP/RTP Proxy is installed in a private network alongside MiaRec Recorders and PostgreSQL instance. Public Address is NAT'd to SIP-Proxy private address, Kamailio will handle NAT translation of SIP headers and SDP via [`nathelper` module](https://kamailio.org/docs/modules/5.0.x/modules/nathelper.html) and [`rtpproxy` module](https://kamailio.org/docs/modules/5.1.x/modules/rtpproxy.html)
+The SIP/RTP Proxy is installed in a private network alongside MiaRec Recorders and PostgreSQL instance. Public Address is NAT'd to SIP-Proxy private address, Kamailio will handle NAT translation of SIP headers and SDP via [`nathelper module`](https://kamailio.org/docs/modules/5.0.x/modules/nathelper.html) and [`rtpproxy module`](https://kamailio.org/docs/modules/5.1.x/modules/rtpproxy.html)
 
 ### LoadBalancing
-Calls are loadbalanceed between Recorder instances using the [`dispatcher` module](https://kamailio.org/docs/modules/4.3.x/modules/dispatcher.html).
+Calls are loadbalanceed between Recorder instances using the [`dispatcher module`](https://kamailio.org/docs/modules/4.3.x/modules/dispatcher.html).
+
+Loadbalancing is affected by several variables, listed [below](./README.md#loadbalancing-1)
+
+By default, calls are distributed equally to all recorders round-robin style
 
 ## Role Varailble
 
 ### Required Varaibles
 
-Host Variables - These varaibles are unique per host, as such they should be supplied as hostvars in the ansible inventory
+Host Variables
+
+These varaibles are unique per host, as such they should be supplied as hostvars in the ansible inventory
 
 - `public_ip_address` publive ipv4 address of host
 - `private_ip_address` private ipv4 address of host
@@ -43,7 +49,9 @@ Host Variables - These varaibles are unique per host, as such they should be sup
 sipproxy0 public_ip_address=1.2.3.4 private_ip_address=10.0.0.1
 sipproxy1 public_ip_address=5.6.7.8 private_ip_address=10.0.0.2
 ```
-Group Variables - These varaibles can be assigned to group vars
+Group Variables
+
+These varaibles can be assigned to group vars
 
 - `dbhost` URL or IP address of postgres instance
 - `dbuser_root` root user with privledge to create user and databases
@@ -57,7 +65,7 @@ dbpass_root = secert
 ```
 
 ### Optional Variables
-- `kamailio_version` version of kamailio to install, default = 5.5, https://github.com/kamailio/kamailio/branches
+- `kamailio_version` version of kamailio to install, default = 5.5, [Kamailio Branches](https://github.com/kamailio/kamailio/branches)
 
 #### Database
 - `db_root` name of root database, default = 'miarecdb'
@@ -80,13 +88,12 @@ dbpass_root = secert
 - `disp_set` dispatcher set - a partition name followed by colon and an id of the set or a list of sets from where to pick up destination address
 - `disp_alg` disaptcher alg - the algorithm(s) used to select the destination address (variables are accepted)
 
-Recorder host vars for loadbalancing
+#### Recorder hostvars for loadbalancing
 
-the following varaibles apply to individual recorder hosts and effect how the sip proxy will interact with them
+the following varaibles apply to individual recorder hosts and effect how the sip proxy will interact with them, [additional documenation here](https://kamailio.org/docs/modules/4.3.x/modules/dispatcher.html#idp51005116)
+
 - `siprec_port` poort recorder will be listening on, default = 5080
 - `siprec_protocol` tcp or udp, default = tcp
-
-[documenation here](https://kamailio.org/docs/modules/4.3.x/modules/dispatcher.html#idp51005116)
 - `siprec_flags` Various flags that affect dispatcher's behaviour, default = 0
 - `siprec_priority` sets the priority in destination list (based on it is done the initial ordering inside the set), default = 0
 - `siprec_attrs` extra fields in form of name1=value1;...;nameN=valueN., default = ''
@@ -97,30 +104,28 @@ Example
 rec0.example siprec_port=5060 siprec_protocol=udp siprec_attrs='weight=60' private_ip_address=10.0.0.10
 rec1.example siprec_attrs="weight=40" private_ip_address=10.0.0.11
 ```
-
 result:
-
 - rec0 would recieve siprec on udp:5060 and recieve 60% of calls
 - rec1 would recieve siprec on tcp:5080 and recieve 40% of calls
 
-Debug
+#### Debug
 - `enable_debug` enables the debugger module, default= false
 - `debug_level` LOG Levels: 3=DBG, 2=INFO, 1=NOTICE, 0=WARN, -1=ERR, default = 2
 - `log_stderror` set to 'yes' to print log messages to terminal, otherwise, debug will be available in syslog, default ='no'
 - `enable_jsonrpc` enables [Kamailio RPC Interface](https://www.kamailio.org/w/2020/11/kamailio-jsonrpc-client-with-http-rest-interface/), default = false
 
-TLS (This feature is not tested)
+#### TLS (This feature is not tested)
 - `enable_tls` Enables TLS module, default = false
 - `tls_max_connections` Maxium number of tls connection, must not excees tecp_max_connections, must not exceed tcp_max_connections, default = 2048
 
-Antiflood
+#### Antiflood
 - `enable_anitflood` [Enables Anitflood](https://www.kamailio.org/docs/modules/devel/modules/pike.html) Automatically ban IP addresses with excessive messaging, default = true
 - `pike_sample_time` Time period in seconds used for sampling (or the sampling accuracy). The smaller the better, but slower, default = 2
 - `pike_reqs_density` How many requests should be allowed per sampling_time_unit before blocking all the incoming request from that, default = 30
 - `pike_remove_latency` Specifies for how long the IP address will be kept in memory after the last request from that IP address. It's a sort of timeout value, in seconds, default = 120
 - `ipban_expire` Time in seconds ip will be stored in ipban table, default = 300
 
-## Example
+## Example Role Usage
 Example Playbook
 ```yaml
 - name: Deploy Kamailio and rtpproxy
@@ -154,6 +159,9 @@ sipproxy1 ansible_host=10.0.0.2 public_ip_address=5.6.7.8 private_ip_address=10.
 recorder0 ansible_host=10.0.0.3 private_ip_address=10.0.0.3 siprec_port=5060 siprec_protocol=udp siprec_attrs='weight=75'
 recorder1 ansible_host=10.0.0.4 private_ip_address=10.0.0.4 siprec_attrs='weight=25'
 
+[recorder]
+recorder0
+recorder1
 
 [sipproxy]
 sipproxy0
@@ -179,11 +187,11 @@ output:
 `kamcmd dispatcher.list` - will show the current state of the dispatcher destinations
 output:
 FLAGS = Current Status
-    AP – Active Probing – Destination is responding to pings & is up
-    IP – Inactive Probing – Destination is not responding to pings and is probably unreachable
-    DX – Destination is disabled (administratively down)
-    AX – Looks like is up or is coming up, but has yet to satisfy minimum thresholds to be considered up (ds_inactive_threshold)
-    TX – Looks like or is, down. Has stopped responding to pings but has not yet satisfied down state failed ping count (ds_probing_threshold)
+ - `AP – Active Probing` – Destination is responding to pings & is up
+ - `IP – Inactive Probing` – Destination is not responding to pings and is probably unreachable
+ - `DX – Destination is disabled` (administratively down)
+ - `AX` – Looks like is up or is coming up, but has yet to satisfy minimum thresholds to be considered up (ds_inactive_threshold)
+ - `TX` – Looks like or is, down. Has stopped responding to pings but has not yet satisfied down state failed ping count (ds_probing_threshold)
 ```
 {
         NRSETS: 1
@@ -220,3 +228,8 @@ FLAGS = Current Status
         }
 }
 ```
+
+`kamcmd dispatcher.set_state [state] [destination]`  This will manually set the state of a destination
+
+for example to admin down a target
+`kamcmd dispatcher.set_state dx 1 sip:10.0.0.3:5080;transport=tcp`
