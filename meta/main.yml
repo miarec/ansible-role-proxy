@@ -1,9 +1,21 @@
 galaxy_info:
-  author: Timothy Lytle
+  author: miarec
   description: ansible role to deploy SIP/RTP proxy behind NAT
+  role_name: sipproxy
   company: Miarec
-  license: license (GPL-2.0-or-later, MIT, etc)
+  min_ansible_version: 2.7
+  platforms:
+    - name: Ubuntu
+      versions:
+        - bionic
+        - xenial
+    - name: EL
+      versions:
+        - 7
+        - 8
+  license: MIT
   min_ansible_version: 2.1
-  galaxy_tags: []
+  galaxy_tags: 
+    - sip
 dependencies: []
 
