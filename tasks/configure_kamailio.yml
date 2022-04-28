@@ -1,13 +1,4 @@
 ---
-# Create config file that will define the DB Engine
-- name: Create kamctlrc Config
-  template:
-    src: kamctlrc.j2
-    dest: /usr/local/etc/kamailio/kamctlrc
-    owner: root
-    group: root
-    mode: 0644
-
 #Create default config file
 - name: Create Kamailo Config
   template:
