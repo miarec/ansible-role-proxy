@@ -1,8 +1,13 @@
 # ansible-role-sip-proxy
 This Ansible role installs a SIP/RTP proxy to load balance multiple Miarec recorders. This is accomplishe using [Kamailio](https://github.com/kamailio/kamailio) and [RTPProxy](https://github.com/sippy/rtpproxy)
 
+## Requirements
+Kamailio requires a database to maintain call state and routing destionations, the ansible playbook assumes this will be a postgreSQL instance available
+- PostgreSQL instance
+- Postgresql user with permission to create users and databases
+
 ## Architecture and Key Functions
-Kamailio and RTPProxy will act as a SIP and RTP Proxy between Voice Platforms and MiaRec Recorders,
+Kamailio and RTPProxy will act as a SIP and RTP Proxy between Voice Platforms and MiaRec Recorders
 
 ```
                                                                             +-----------------+
@@ -23,12 +28,6 @@ The SIP/RTP Proxy is installed in a private network alongside MiaRec Recorders a
 
 ### LoadBalancing
 Calls are loadbalanceed between Recorder instances using the [`dispatcher` module](https://kamailio.org/docs/modules/4.3.x/modules/dispatcher.html).
-
-## Requirements
-Kamailio requires a database to maintain call state and routing destionations, the ansible playbook assumes this will be a postgreSQL instance available
-- PostgreSQL instance
-- Postgresql user with permission to create users and databases
-
 
 ## Role Varailble
 
@@ -121,13 +120,10 @@ Antiflood
 - `pike_remove_latency` Specifies for how long the IP address will be kept in memory after the last request from that IP address. It's a sort of timeout value, in seconds, default = 120
 - `ipban_expire` Time in seconds ip will be stored in ipban table, default = 300
 
-
-
-
 ## Example
 Example Playbook
 ```yaml
-- name: Deploy Kamailio and Rtpproxy.
+- name: Deploy Kamailio and rtpproxy
   hosts:
     - sipproxy
   become: true
@@ -143,10 +139,8 @@ Example Playbook
           attrs: "{{ hostvars[item].siprec_attrs | default('') }}"
       with_items: "{{ groups.recorder }}"
       register: _tmp_dispatch_dest
-
     - set_fact:
         dispatcher_destinations: "{{ _tmp_dispatch_dest.results | selectattr('ansible_facts', 'defined') | map(attribute='ansible_facts.tmp_dest') | list }}"
-
   roles:
     - role: 'ansible-role-sip-proxy'
   tags: 'sipproxy'
@@ -157,6 +151,9 @@ Example Inventory
 [all]
 sipproxy0 ansible_host=10.0.0.1 public_ip_address=1.2.3.4 private_ip_address=10.0.0.1
 sipproxy1 ansible_host=10.0.0.2 public_ip_address=5.6.7.8 private_ip_address=10.0.0.2
+recorder0 ansible_host=10.0.0.3 private_ip_address=10.0.0.3 siprec_port=5060 siprec_protocol=udp siprec_attrs='weight=75'
+recorder1 ansible_host=10.0.0.4 private_ip_address=10.0.0.4 siprec_attrs='weight=25'
+
 
 [sipproxy]
 sipproxy0
@@ -167,4 +164,59 @@ dbhost = database.example.com
 dbrootpass = secert
 enable_debug = true
 debug_level = 3
+```
+
+## Useful Commands
+`kamctl dispatcher show` - will show what is in the dispatcher table in kamailio database
+output:
+```-e dispatcher gateways
+1|1|sip:10.0.0.3:5060;transport=udp|0|0|weight=75|recorder0
+2|1|sip:10.0.0.4:5080;transport=tcp|0|0|weight=25|recorder1
+```
+
+`kamcmd dispatcher.reload` - this will restart the dispatcher module, this is required anytime changes are made to the disaptcher table
+
+`kamcmd dispatcher.list` - will show the current state of the dispatcher destinations
+output:
+FLAGS = Current Status
+    AP – Active Probing – Destination is responding to pings & is up
+    IP – Inactive Probing – Destination is not responding to pings and is probably unreachable
+    DX – Destination is disabled (administratively down)
+    AX – Looks like is up or is coming up, but has yet to satisfy minimum thresholds to be considered up (ds_inactive_threshold)
+    TX – Looks like or is, down. Has stopped responding to pings but has not yet satisfied down state failed ping count (ds_probing_threshold)
+```
+{
+        NRSETS: 1
+        RECORDS: {
+                SET: {
+                        ID: 1
+                        TARGETS: {
+                                DEST: {
+                                        URI: sip:10.0.0.3:5060;transport=udp
+                                        FLAGS: AP
+                                        PRIORITY: 0
+                                        LATENCY: {
+                                                AVG: 0.000000
+                                                STD: 0.000000
+                                                EST: 0.000000
+                                                MAX: 0
+                                                TIMEOUT: 54
+                                        }
+                                }
+                                DEST: {
+                                        URI: sip:10.0.0.4:5080;transport=tcp
+                                        FLAGS: AP
+                                        PRIORITY: 0
+                                        LATENCY: {
+                                                AVG: 0.000000
+                                                STD: 0.000000
+                                                EST: 0.000000
+                                                MAX: 0
+                                                TIMEOUT: 115
+                                        }
+                                }
+                        }
+                }
+        }
+}
 ```

@@ -14,6 +14,6 @@
     name: rtpproxy
     state: restarted
 
-- name: Reload dispatcher module
+- name: reload dispatcher
   become: true
-  shell: "kamctl dispatcher reload"
+  shell: "kamcmd dispatcher.reload"

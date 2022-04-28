@@ -47,47 +47,28 @@
   tags: rtpproxy
 
 # Install Kamailio and Rtpproxy
-- name: Install Kamailio.
-  include: install_kamailio.yml
-  when: "not _kamailio_install.stat.exists or kamailio_version is not defined or kamailio_version|string not in _kamailio_version.stdout"
-  tags:
-    - kamailio
-
 - name: Install Rtpproxy.
   include: install_rtpproxy.yml
   when: "not _rtpproxy_install.stat.exists"
   tags:
     - rtpproxy
 
-# Generate Configuration files
-- name: Configure Kamailio.
-  include: configure_kamailio.yml
+- name: Install Kamailio.
+  include: install_kamailio.yml
+  when: "not _kamailio_install.stat.exists or kamailio_version is not defined or kamailio_version|string not in _kamailio_version.stdout"
   tags:
     - kamailio
 
+# Generate Configuration files
 - name: Configure Rtpproxy.
   include: configure_rtpproxy.yml
   tags:
     - rtpproxy
 
-# # Still need to make idempotent
-# - name: Add Recorders as dispatcher destinations.
-#   command: |
-#     psql -c "INSERT INTO dispatcher
-#     VALUES ('{{ index }}', '{{ disp_set }}', 'sip:{{ item.ip }}:{{ item.port }};transport={{ item.protocol }}', '{{ item.flags }}', '{{ item.priority }}', '{{ item.attrs }}', '{{ item.name }}')
-#     ON CONFLICT (id)
-#     DO UPDATE SET
-#     id={{ index }}, setid={{ disp_set }}, destination='sip:{{ item.ip }}:{{ item.port }};transport={{ item.protocol }}', flags='{{ item.flags }}', priority='{{ item.priority }}', attrs='{{ item.attrs }}', description='{{ item.name }}';"
-#   run_once: true
-#   loop: "{{ dispatcher_destinations }}"
-#   loop_control:
-#     index_var: index
-#   environment:
-#     PGHOST: "{{ dbhost }}"
-#     PGPORT: "{{ dbport }}"
-#     PGUSER: "{{ dbuser_kam }}"
-#     PGPASSWORD: "{{ dbpass_kam }}"
-#     PGDATABASE: "{{ db_kam }}"
+- name: Configure Kamailio.
+  include: configure_kamailio.yml
+  tags:
+    - kamailio
 
 - name: Create Dispatcher SQL script.
   template:
@@ -96,7 +77,7 @@
     owner: root
     group: root
     mode: 0644
-  register: _disptacher_destinations
+  register: _dispatcher_destinations
 
 - name: Update dispatcher table.
   postgresql_query:
@@ -107,5 +88,6 @@
     login_password: "{{ dbpass_kam }}"
     path_to_script: "/usr/local/etc/kamailio/dispatcher.list.sql"
   when: _dispatcher_destinations.changed
+  run_once: true
   notify:
-   - dispatcher
+   - reload dispatcher

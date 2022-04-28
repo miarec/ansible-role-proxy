@@ -16,3 +16,4 @@ debian_dependencies:
   - libpq5
   - libpq-dev
   - postgresql-client
+  - python3-pip
