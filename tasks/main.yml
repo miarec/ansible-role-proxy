@@ -47,7 +47,7 @@
 
 # Check Database Configuration
 - name: Check if Database {{ db_kam }} exists.
-  command: "psql -c '\list' | grep {{ db_kam }}"
+  command: "psql -c \"\\list\" | grep {{ db_kam }}"
   environment:
     PGHOST: "{{ dbhost }}"
     PGPORT: "{{ dbport }}"
@@ -57,7 +57,7 @@
   register: _db_kam
 
 - name: Check if user {{ dbuser_kam }} exists.
-  command: "psql -c '\du' | grep {{ dbuser_kam }}"
+  command: "psql -c \"\\du\" | grep {{ dbuser_kam }}"
   when: "_db_kam.stat.exists"
   environment:
     PGHOST: "{{ dbhost }}"
@@ -68,7 +68,7 @@
   register: _dbuser_kam
 
 - name: Check if dispatcher table exists.
-  command: "psql -c '\dt' | grep dispatcher"
+  command: "psql -c \"\\dt\" | grep dispatcher"
   when: _db_kam.stat.exists and _dbuser_kam.stat.exists
   environment:
     PGHOST: "{{ dbhost }}"
