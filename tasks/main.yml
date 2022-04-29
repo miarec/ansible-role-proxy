@@ -77,7 +77,6 @@
 - name: Configure Kamailio database.
   include: configure_database.yml
   when: "db_kam not in _db_kam.stdout or dbuser_kam not in _dbuser_kam.stdout or dispatcher not in _dbtable_kam.stdout"
-  when: "not _db_kam.stat.exists or not _dbuser_kam.stat.exists or not _dbtable_kam.stat.exists"
   tags:
     - kamailio
     - database
