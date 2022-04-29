@@ -39,12 +39,44 @@
   failed_when: False
   tags: kamailio
 
-
 - name: Check for existing Rtpproxy binary.
   stat:
     path: "{{ rtpproxy_bin }}"
   register: _rtpproxy_install
   tags: rtpproxy
+
+# Check Database Configuration
+- name: Check if Database {{ db_kam }} exists.
+  command: "psql -c '\list' | grep {{ db_kam }}"
+  environment:
+    PGHOST: "{{ dbhost }}"
+    PGPORT: "{{ dbport }}"
+    PGUSER: "{{ dbuser_root }}"
+    PGPASSWORD: "{{ dbpass_root }}"
+    PGDATABASE: "{{ db_root }}"
+  register: _db_kam
+
+- name: Check if user {{ dbuser_kam }} exists.
+  command: "psql -c '\du' | grep {{ dbuser_kam }}"
+  when: "_db_kam.stat.exists"
+  environment:
+    PGHOST: "{{ dbhost }}"
+    PGPORT: "{{ dbport }}"
+    PGUSER: "{{ dbuser_root }}"
+    PGPASSWORD: "{{ dbpass_root }}"
+    PGDATABASE: "{{ db_root }}"
+  register: _dbuser_kam
+
+- name: Check if dispatcher table exists.
+  command: "psql -c '\dt' | grep dispatcher"
+  when: _db_kam.stat.exists and _dbuser_kam.stat.exists
+  environment:
+    PGHOST: "{{ dbhost }}"
+    PGPORT: "{{ dbport }}"
+    PGUSER: "{{ dbuser_kam }}"
+    PGPASSWORD: "{{ dbpass_kam }}"
+    PGDATABASE: "{{ db_kam }}"
+  register: _dbtable_kam
 
 # Install Kamailio and Rtpproxy
 - name: Install Rtpproxy.
@@ -58,6 +90,14 @@
   when: "not _kamailio_install.stat.exists or kamailio_version is not defined or kamailio_version|string not in _kamailio_version.stdout"
   tags:
     - kamailio
+
+# Configure Kamailio Database
+- name: Configure Kamailio database.
+  include: configure_database.yml
+  when: "not _db_kam.stat.exists or not _dbuser_kam.stat.exists or not _dbtable_kam.stat.exists"
+  tags:
+    - kamailio
+    - database
 
 # Generate Configuration files
 - name: Configure Rtpproxy.
