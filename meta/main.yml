@@ -1,3 +1,4 @@
+---
 galaxy_info:
   author: miarec
   description: ansible role to deploy SIP/RTP proxy behind NAT
@@ -14,8 +15,6 @@ galaxy_info:
         - 7
         - 8
   license: MIT
-  min_ansible_version: 2.1
-  galaxy_tags: 
+  galaxy_tags:
     - sip
 dependencies: []
-

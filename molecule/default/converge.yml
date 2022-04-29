@@ -1,29 +1,11 @@
 ---
-#- name: Install PostgreSQL
-#  hosts: all
-#  vars_files:
-#    - vars/db.yml
-#  pre_tasks:
-#    - name: Install pip3
-#      become: yes
-#      apt: name=python3-pip state=present update_cache=true
-#      when: ansible_os_family == "Debian"
-#
-#    - name: Install psycopg2 for ansible to be able to create postgresql users
-#      become: yes
-#      pip: name=psycopg2-binary
-#      when: ansible_os_family == "Debian"
-#  roles:
-#    - role: 'postgresql'
-
-
 - name: Converge
   hosts: all
   become: true
   vars_files:
    - vars/sipproxy.yml
   pre_tasks:
-    - name: Install Depedencies
+    - name: Install Test Depedencies.
       become: yes
       apt:
         update_cache: true
@@ -43,22 +25,18 @@
         name: postgresql
         state: started
 
-    - name: Create Database
+    - name: Create Root Database.
       become_user: postgres
       postgresql_db:
         name: "{{ db_root }}"
         state: present
 
-    - name: Create Database user
+    - name: Create User Database user.
       become_user: postgres
       postgresql_user:
         name: "{{ dbuser_root }}"
         password: "{{ dbpass_root }}"
         role_attr_flags: "SUPERUSER"
-#      command: "{{ item }}"
-#      with_items:
-#        - "sudo systemctl start postgresql"
-#        - "sudo -u postgres psql -c \"CREATE DATABASE test;\""
-#        - "sudo -u postgres psql -c \"CREATE ROLE {{ dbuser_root }} WITH LOGIN SUPERUSER PASSWORD '{{ dbpass_root }}';\""
+
   roles:
     - role: ansible-role-sip-proxy

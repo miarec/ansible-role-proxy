@@ -1,12 +1,13 @@
+---
 dispatcher_destinations: [{
-  "name":"molecule_test",
-  "ip" : "10.0.0.1",
-  "port" : "5080",
+  "name": "molecule_test",
+  "ip": "10.0.0.1",
+  "port": "5080",
   "protocol": "tcp",
-  "flags" : "0",
-  "priority" :"0",
-  "attrs" : "",
-  }]
+  "flags": "0",
+  "priority": "0",
+  "attrs": "",
+}]
 
 dbhost: "localhost"
 dbuser_root: "miarec"

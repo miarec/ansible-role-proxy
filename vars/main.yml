@@ -5,9 +5,3 @@ kamailio_bin: /usr/local/sbin/kamailio
 
 rtpproxy_dest_directory: /usr/local/src/rtpproxy
 rtpproxy_bin: /usr/local/bin/rtpproxy
-
-
-
-
-
-

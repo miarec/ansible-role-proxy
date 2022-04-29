@@ -11,9 +11,7 @@
     - restart rtpproxy
 
 - name: Install psycopg2 for ansible to be able to create postgresql.
-  become: yes
+  become: true
   pip:
     name: psycopg2-binary
   when: ansible_os_family == "Debian"
-
-

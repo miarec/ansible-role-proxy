@@ -35,8 +35,8 @@
   command: "{{ kamailio_bin }} --version"
   register: _kamailio_version
   when: "_kamailio_install.stat.exists"
-  changed_when: False
-  failed_when: False
+  changed_when: false
+  failed_when: false
   tags: kamailio
 
 - name: Check for existing Rtpproxy binary.
@@ -48,15 +48,18 @@
 # Check Database Configuration
 - name: Check if Database {{ db_kam }} exists.
   command: "psql postgres://{{ dbuser_root }}:{{ dbpass_root }}@{{ dbhost }}:{{ dbport }}/{{ db_root }} -c \"\\list\" | grep {{ db_kam }}"
+  changed_when: false
   register: _db_kam
 
 - name: Check if user {{ dbuser_kam }} exists.
   command: "psql postgres://{{ dbuser_root }}:{{ dbpass_root }}@{{ dbhost }}:{{ dbport }}/{{ db_root }} -c \"\\du\" | grep {{ dbuser_kam }}"
+  changed_when: false
   when: "db_kam in _db_kam.stdout"
   register: _dbuser_kam
 
 - name: Check if dispatcher table exists.
   command: "psql postgres://{{ dbuser_kam }}:{{ dbpass_kam }}@{{ dbhost }}:{{ dbport }}/{{ db_kam }} -c \"\\dt\" | grep dispatcher"
+  changed_when: false
   when: "db_kam in _db_kam.stdout and dbuser_kam in _dbuser_kam.stdout"
   register: _dbtable_kam
 
@@ -76,7 +79,7 @@
 # Configure Kamailio Database
 - name: Configure Kamailio database.
   include: configure_database.yml
-  when: "db_kam not in _db_kam.stdout or dbuser_kam not in _dbuser_kam.stdout or dispatcher not in _dbtable_kam.stdout"
+  when: "db_kam not in _db_kam.stdout or dbuser_kam not in _dbuser_kam.stdout or 'dispatcher' not in _dbtable_kam.stdout"
   tags:
     - kamailio
     - database
@@ -112,4 +115,4 @@
   when: _dispatcher_destinations.changed
   run_once: true
   notify:
-   - reload dispatcher
+    - reload dispatcher

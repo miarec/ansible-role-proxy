@@ -3,7 +3,3 @@ ansible
 molecule[docker]
 docker
 pytest-testinfra>=1.7.0
-
-- name: postgresql
-  src: https://github.com/miarec/ansible-postgresql.git
-  scm: git

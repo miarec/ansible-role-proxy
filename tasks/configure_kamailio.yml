@@ -1,5 +1,5 @@
 ---
-#Create default config file
+# Create default config file
 - name: Create Kamailo Config
   template:
     src: kamailio.cfg.j2
