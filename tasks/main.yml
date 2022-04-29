@@ -47,35 +47,17 @@
 
 # Check Database Configuration
 - name: Check if Database {{ db_kam }} exists.
-  command: "psql -c \"\\list\" | grep {{ db_kam }}"
-  environment:
-    PGHOST: "{{ dbhost }}"
-    PGPORT: "{{ dbport }}"
-    PGUSER: "{{ dbuser_root }}"
-    PGPASSWORD: "{{ dbpass_root }}"
-    PGDATABASE: "{{ db_root }}"
+  command: "psql postgres://{{ dbuser_root }}:{{ dbpass_root }}@{{ dbhost }}:{{ dbport }}/{{ db_root }} -c \"\\list\" | grep {{ db_kam }}"
   register: _db_kam
 
 - name: Check if user {{ dbuser_kam }} exists.
-  command: "psql -c \"\\du\" | grep {{ dbuser_kam }}"
+  command: "psql postgres://{{ dbuser_root }}:{{ dbpass_root }}@{{ dbhost }}:{{ dbport }}/{{ db_root }} -c \"\\du\" | grep {{ dbuser_kam }}"
   when: "_db_kam.stat.exists"
-  environment:
-    PGHOST: "{{ dbhost }}"
-    PGPORT: "{{ dbport }}"
-    PGUSER: "{{ dbuser_root }}"
-    PGPASSWORD: "{{ dbpass_root }}"
-    PGDATABASE: "{{ db_root }}"
   register: _dbuser_kam
 
 - name: Check if dispatcher table exists.
-  command: "psql -c \"\\dt\" | grep dispatcher"
+  command: "psql postgres://{{ dbuser_kam }}:{{ dbpass_kam }}@{{ dbhost }}:{{ dbport }}/{{ db_kam }} -c \"\\dt\" | grep dispatcher"
   when: _db_kam.stat.exists and _dbuser_kam.stat.exists
-  environment:
-    PGHOST: "{{ dbhost }}"
-    PGPORT: "{{ dbport }}"
-    PGUSER: "{{ dbuser_kam }}"
-    PGPASSWORD: "{{ dbpass_kam }}"
-    PGDATABASE: "{{ db_kam }}"
   register: _dbtable_kam
 
 # Install Kamailio and Rtpproxy
