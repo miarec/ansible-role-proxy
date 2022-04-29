@@ -52,12 +52,12 @@
 
 - name: Check if user {{ dbuser_kam }} exists.
   command: "psql postgres://{{ dbuser_root }}:{{ dbpass_root }}@{{ dbhost }}:{{ dbport }}/{{ db_root }} -c \"\\du\" | grep {{ dbuser_kam }}"
-  when: "_db_kam.stat.exists"
+  when: "db_kam in _db_kam.stdout"
   register: _dbuser_kam
 
 - name: Check if dispatcher table exists.
   command: "psql postgres://{{ dbuser_kam }}:{{ dbpass_kam }}@{{ dbhost }}:{{ dbport }}/{{ db_kam }} -c \"\\dt\" | grep dispatcher"
-  when: _db_kam.stat.exists and _dbuser_kam.stat.exists
+  when: "db_kam in _db_kam.stdout and dbuser_kam in _dbuser_kam.stdout"
   register: _dbtable_kam
 
 # Install Kamailio and Rtpproxy
@@ -76,6 +76,7 @@
 # Configure Kamailio Database
 - name: Configure Kamailio database.
   include: configure_database.yml
+  when: "db_kam not in _db_kam.stdout or dbuser_kam not in _dbuser_kam.stdout or dispatcher not in _dbtable_kam.stdout"
   when: "not _db_kam.stat.exists or not _dbuser_kam.stat.exists or not _dbtable_kam.stat.exists"
   tags:
     - kamailio
