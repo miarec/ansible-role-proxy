@@ -6,7 +6,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 def test_directories(host):
     dirs = [
-        "/etc/promtail"
+        "/usr/local/etc/kamailio"
     ]
     for dir in dirs:
         d = host.file(dir)
@@ -30,7 +30,7 @@ def test_files(host):
 
 def test_service(host):
     services = [
-      "kamailio"
+      "kamailio",
       "rtpproxy"
     ]
 
@@ -41,8 +41,8 @@ def test_service(host):
 
 def test_socket(host):
     sockets = [
-        "tcp://0.0.0.0:5080"
-        "udp://0.0.0.0:5080"
+        "tcp://127.0.0.1:5080",
+        "udp://127.0.0.1:5080"
     ]
     for socket in sockets:
         s = host.socket(socket)
