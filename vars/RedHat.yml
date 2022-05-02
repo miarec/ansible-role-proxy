@@ -1,7 +1,7 @@
 ---
 redhat_dependencies:
   - epel-release
-  - @Development tool
+  - "@Development tool"
   - bison
   - pcre-devel
   - libpcap-devel
