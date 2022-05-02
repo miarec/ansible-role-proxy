@@ -1,6 +1,6 @@
 ---
 # Create default config file
-- name: Create Kamailo config file.
+- name: Create Kamailio config file.
   template:
     src: kamailio.cfg.j2
     dest: "/usr/local/etc/kamailio/kamailio.cfg"

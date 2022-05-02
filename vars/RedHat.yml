@@ -21,6 +21,6 @@ redhat_dependencies:
   - perl-Qt-devel
   - perl-Glib-devel
   - perl-Tk-devel
-  - libpq5
-  - libpq-dev
+  # - libpq5
+  # - libpq-dev
   - postgresql

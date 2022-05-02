@@ -95,7 +95,7 @@
   tags:
     - kamailio
 
-- name: Create dispatcher SQL script.
+- name: Create dispatcher destinations SQL script.
   template:
     src: dispatcher-list.sql.j2
     dest: "/usr/local/etc/kamailio/dispatcher.list.sql"
