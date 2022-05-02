@@ -45,4 +45,4 @@ pike_remove_latency: 120   # Specifies for how long the IP address will be kept 
 ipban_expire: 300   # Time in seconds ip will be stored in ipban table
 
 
-enable_NAT_keepalive: false   # It might be required to NAT SIP OPTIONS messages depending on archetecture
+enable_nat_keepalive: false   # It might be required to NAT SIP OPTIONS messages depending on archetecture

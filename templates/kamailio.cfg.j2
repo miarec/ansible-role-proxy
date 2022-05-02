@@ -307,7 +307,7 @@ route[REGISTRAR] {
 
         if(isflagset(FLT_NATS)) {
                 setbflag(FLB_NATB);
-{% if enable_NAT_keepalive == true %}
+{% if enable_nat_keepalive == true %}
                 # do SIP NAT pinging
                 setbflag(FLB_NATSIPPING);
 {% endif %}

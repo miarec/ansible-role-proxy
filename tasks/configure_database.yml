@@ -20,5 +20,6 @@
 # Run kamdbctl to setup kamailio database
 - name: Create Kamailio database.
   become: true
-  shell: "/usr/local/sbin/kamdbctl create {{ db_kam }}"
+  command: "/usr/local/sbin/kamdbctl create {{ db_kam }}"
   run_once: true
+  changed_when: true

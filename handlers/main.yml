@@ -16,4 +16,4 @@
 
 - name: reload dispatcher
   become: true
-  shell: "kamcmd dispatcher.reload"
+  command: "kamcmd dispatcher.reload"
