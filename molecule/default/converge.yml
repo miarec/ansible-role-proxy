@@ -14,6 +14,18 @@
      with_items:
       - postgresql
       - python3-pip
+     when: ansible_os_family == "Debian"
+
+   - name: Install Test Depedencies.
+     become: true
+     yum:
+      update_cache: true
+      name: "{{ item }}"
+      state: present
+     with_items:
+      - postgresql12-server
+      - python3-pip
+     when: ansible_os_family == "RedHat"
 
    - name: Install psycopg2 for ansible to be able to create postgresql users
      become: true
