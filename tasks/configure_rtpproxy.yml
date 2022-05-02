@@ -9,3 +9,8 @@
     mode: 0644
   notify:
     - restart rtpproxy
+
+- name: Enable Rtpproxy service.
+  service:
+    name: rtpproxy
+    state: enable

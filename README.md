@@ -41,7 +41,7 @@ Host Variables
 
 These varaibles are unique per host, as such they should be supplied as hostvars in the ansible inventory
 
-- `public_ip_address` publive ipv4 address of host
+- `public_ip_address` public ipv4 address of host
 - `private_ip_address` private ipv4 address of host
 
 ```ini

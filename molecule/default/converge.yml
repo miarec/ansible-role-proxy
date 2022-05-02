@@ -28,8 +28,33 @@
       name: "{{ item }}"
       state: present
      with_items:
+      - ca-certificates
+      - python-psycopg2
+      - python-pycurl
+      - glibc-common
+      - epel-release
+      - libselinux-python
+     when: ansible_os_family == "RedHat"
+
+   - name: Test Setup - Add PostgreSQL repo (RedHat).
+     become: true
+     yum_repository:
+      name: postgresql
+      description: postgresql yum repo
+      baseurl: "http://yum.postgresql.org/12/{{ ansible_os_family | lower }}/rhel-{{ ansible_distribution_major_version }}-{{ ansible_architecture }}"
+      gpgkey: "https://download.postgresql.org/pub/repos/yum/RPM-GPG-KEY-PGDG-12"
+     when: ansible_os_family == "RedHat"
+
+   - name: Test Setup - Install PostgreSQL (RedHat).
+     become: true
+     yum:
+      update_cache: true
+      name: "{{ item }}"
+      state: present
+     with_items:
       - postgresql12-server
-      - python3-pip
+      - postgresql12
+      - postgresql12-contrib
      when: ansible_os_family == "RedHat"
 
    - name: Test Setup - Start Postgres Service

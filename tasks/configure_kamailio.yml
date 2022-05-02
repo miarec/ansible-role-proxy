@@ -11,7 +11,7 @@
     - restart kamailio
 
 # Create SystemD Service
-- name: Create Kamailio SystemD Service
+- name: Create Kamailio SystemD Service File.
   template:
     src: kamailio.service.j2
     dest: /etc/systemd/system/kamailio.service
@@ -20,3 +20,8 @@
     mode: 0644
   notify:
     - restart kamailio
+
+- name: Enable Kamailio service.
+  service:
+    name: kamailio
+    state: enable
