@@ -24,7 +24,7 @@
     - rtpproxy
     - database
 
-# Check for previously installed Kamailio and Rtpproxy
+# Check for previously installed Kamailio and RTPProxy
 - name: Check for existing Kamailio binary.
   stat:
     path: "{{ kamailio_bin }}"
@@ -39,14 +39,14 @@
   failed_when: false
   tags: kamailio
 
-- name: Check for existing Rtpproxy binary.
+- name: Check for existing RTPProxy binary.
   stat:
     path: "{{ rtpproxy_bin }}"
   register: _rtpproxy_install
   tags: rtpproxy
 
 # Check Database Configuration
-- name: Check if Database {{ db_kam }} exists.
+- name: Check if Database '{{ db_kam }}' exists.
   command: "psql postgres://{{ dbuser_root }}:{{ dbpass_root }}@{{ dbhost }}:{{ dbport }}/{{ db_root }} -c \"\\list\" | grep {{ db_kam }}"
   changed_when: false
   register: _db_kam
@@ -63,8 +63,8 @@
   when: "db_kam in _db_kam.stdout and dbuser_kam in _dbuser_kam.stdout"
   register: _dbtable_kam
 
-# Install Kamailio and Rtpproxy
-- name: Install Rtpproxy.
+# Install Kamailio and RTPProxy
+- name: Install RTPProxy.
   include: install_rtpproxy.yml
   when: "not _rtpproxy_install.stat.exists"
   tags:
@@ -85,7 +85,7 @@
     - database
 
 # Generate Configuration files
-- name: Configure Rtpproxy.
+- name: Configure RTPProxy.
   include: configure_rtpproxy.yml
   tags:
     - rtpproxy
@@ -95,7 +95,7 @@
   tags:
     - kamailio
 
-- name: Create Dispatcher SQL script.
+- name: Create dispatcher SQL script.
   template:
     src: dispatcher-list.sql.j2
     dest: "/usr/local/etc/kamailio/dispatcher.list.sql"
@@ -103,19 +103,6 @@
     group: root
     mode: 0644
   register: _dispatcher_destinations
-
-# - name: Update dispatcher table.
-#   postgresql_query:
-#     db: "{{ db_kam }}"
-#     login_host: "{{ dbhost }}"
-#     port: "{{ dbport }}"
-#     login_user: "{{ dbuser_kam }}"
-#     login_password: "{{ dbpass_kam }}"
-#     path_to_script: "/usr/local/etc/kamailio/dispatcher.list.sql"
-#   when: _dispatcher_destinations.changed
-#   run_once: true
-#   notify:
-#     - reload dispatcher
 
 - name: Update dispatcher table.
   command: "psql postgres://{{ dbuser_kam }}:{{ dbpass_kam }}@{{ dbhost }}:{{ dbport }}/{{ db_kam }} -f '/usr/local/etc/kamailio/dispatcher.list.sql'"
