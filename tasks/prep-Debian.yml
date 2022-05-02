@@ -1,6 +1,6 @@
 ---
 # Install dependencies
-- name: Debian - Install Package Dependencies
+- name: Install Package Dependencies - Debian
   become: true
   apt:
     update_cache: true
@@ -10,8 +10,8 @@
     - restart kamailio
     - restart rtpproxy
 
-- name: Install psycopg2 for ansible to be able to create postgresql.
-  become: true
-  pip:
-    name: psycopg2-binary
-  when: ansible_os_family == "Debian"
+# - name: Install psycopg2 for ansible to be able to create postgresql.
+#   become: true
+#   pip:
+#     name: psycopg2-binary
+#   when: ansible_os_family == "Debian"

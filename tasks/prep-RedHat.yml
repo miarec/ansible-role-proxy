@@ -1,6 +1,6 @@
 ---
 # Install dependencies
-- name: RedHat - Install Package Dependencies
+- name: Install Package Dependencies (RedHat)
   become: true
   yum:
     update_cache: true

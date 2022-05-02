@@ -5,7 +5,7 @@
   vars_files:
    - vars/sipproxy.yml
   pre_tasks:
-   - name: Install Test Depedencies.
+   - name: Install Test Depedencies (Debian).
      become: true
      apt:
       update_cache: true
@@ -16,7 +16,12 @@
       - python3-pip
      when: ansible_os_family == "Debian"
 
-   - name: Install Test Depedencies.
+   - name: Install psycopg2 for ansible to be able to create postgresql users
+     become: true
+     pip: name=psycopg2-binary
+     when: ansible_os_family == "Debian"
+
+   - name: Install Test Depedencies (RedHat).
      become: true
      yum:
       update_cache: true
@@ -26,11 +31,6 @@
       - postgresql12-server
       - python3-pip
      when: ansible_os_family == "RedHat"
-
-   - name: Install psycopg2 for ansible to be able to create postgresql users
-     become: true
-     pip: name=psycopg2-binary
-     when: ansible_os_family == "Debian"
 
    - name: Start Postgres Service
      service:

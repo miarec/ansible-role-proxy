@@ -104,14 +104,22 @@
     mode: 0644
   register: _dispatcher_destinations
 
+# - name: Update dispatcher table.
+#   postgresql_query:
+#     db: "{{ db_kam }}"
+#     login_host: "{{ dbhost }}"
+#     port: "{{ dbport }}"
+#     login_user: "{{ dbuser_kam }}"
+#     login_password: "{{ dbpass_kam }}"
+#     path_to_script: "/usr/local/etc/kamailio/dispatcher.list.sql"
+#   when: _dispatcher_destinations.changed
+#   run_once: true
+#   notify:
+#     - reload dispatcher
+
 - name: Update dispatcher table.
-  postgresql_query:
-    db: "{{ db_kam }}"
-    login_host: "{{ dbhost }}"
-    port: "{{ dbport }}"
-    login_user: "{{ dbuser_kam }}"
-    login_password: "{{ dbpass_kam }}"
-    path_to_script: "/usr/local/etc/kamailio/dispatcher.list.sql"
+  command: "psql postgres://{{ dbuser_kam }}:{{ dbpass_kam }}@{{ dbhost }}:{{ dbport }}/{{ db_kam }} -f '/usr/local/etc/kamailio/dispatcher.list.sql'"
+  changed_when: true
   when: _dispatcher_destinations.changed
   run_once: true
   notify:
