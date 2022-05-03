@@ -1,10 +1,9 @@
 ---
-redhat_repo_dep:
+redhat_dep_packages_repo:
   - epel-release
   - centos-release-scl
+
 redhat_dep_packages:
-  # - epel-release
-  # - centos-release-scl
   - make
   - "@Development tools"
   - bison
@@ -27,8 +26,8 @@ redhat_dep_packages:
   - perl-Glib-devel
   - perl-Tk-devel
   - libpq5
-  # - libpq-dev
   - devtoolset-7-gcc
   - devtoolset-7-gcc-c++
   - devtoolset-7-binutils
   - postgresql
+  - postgresql-devel
