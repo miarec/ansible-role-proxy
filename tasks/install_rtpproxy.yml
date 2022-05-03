@@ -31,11 +31,23 @@
     clone: true
 
 # Compile Files
-- name: Compile RTPProxy build files.
+- name: Compile RTPProxy build files (Debian).
   shell: "{{ item }}"
   with_items:
     - "cd {{ rtpproxy_dest_directory }}/rtpproxy && ./configure"
     - "cd {{ rtpproxy_dest_directory }}/rtpproxy && make all"
     - "cd {{ rtpproxy_dest_directory }}/rtpproxy && make install"
+  when: ansible_os_family == 'Debian'
   notify:
     - restart rtpproxy
+
+- name: Compile RTPProxy build files (RedHat).
+  shell: "{{ item }}"
+  with_items:
+    - "cd {{ rtpproxy_dest_directory }}/rtpproxy && ./configure"
+    - "cd {{ rtpproxy_dest_directory }}/rtpproxy && scl enable devtoolset-7 bash && make all"
+    - "cd {{ rtpproxy_dest_directory }}/rtpproxy && scl enable devtoolset-7 bash && make install"
+  when: ansible_os_family == 'RedHat'
+  notify:
+    - restart rtpproxy
+

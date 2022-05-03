@@ -1,7 +1,9 @@
 ---
 redhat_dependencies:
   - epel-release
-  - "@Development tool"
+  - centos-release-scl
+  - make
+  - "@Development tools"
   - bison
   - pcre-devel
   - libpcap-devel
@@ -21,6 +23,9 @@ redhat_dependencies:
   - perl-Qt-devel
   - perl-Glib-devel
   - perl-Tk-devel
-  # - libpq5
+  - libpq5
   # - libpq-dev
+  - devtoolset-7-gcc
+  - devtoolset-7-gcc-c++
+  - devtoolset-7-binutils
   - postgresql

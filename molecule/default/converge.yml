@@ -65,18 +65,28 @@
 
       - name: Test Setup - Init PostgreSQL DB (RedHat)
         command: "/usr/pgsql-12/bin/postgresql-12-setup initdb"
-        when: _postresql_install.changed
-
-      - name: Modify pg_hba.conf
-        lineinfile:
-         path: "/var/lib/pgsql/12/data/pg_hba.conf"
-         search_string: "ident"
-         line: "md5"
+        when: _postgresql_install.changed
 
       - name: Test Setup - Start Postgres Service (RedHat).
         service:
          name: postgresql-12
          state: started
+
+      - name: Test Setup - Modify pg_hba.conf for host access.
+        become_user: postgres
+        postgresql_pg_hba:
+         dest: /var/lib/pgsql/12/data/pg_hba.conf
+         contype: host
+         address: 127.0.0.1/32
+         method: md5
+         state: present
+        register: _pg_hba
+
+      - name: Test Setup - Restart Postgres Service (RedHat).
+        service:
+         name: postgresql-12
+         state: restarted
+        when: _pg_hba.changed
 
      when: ansible_os_family == "RedHat"
      become: true
@@ -94,6 +104,15 @@
       name: "{{ dbuser_root }}"
       password: "{{ dbpass_root }}"
       role_attr_flags: "SUPERUSER"
+
+   - name: Test Setup - Modify pg_hba.
+     become_user: postgres
+     postgresql_pg_hba:
+      dest: /var/lib/pgsql/12/data/pg_hba.conf
+      contype: host
+      address: 127.0.0.1/32
+      method: md5
+      state: present
 
   roles:
    - role: ansible-role-sip-proxy

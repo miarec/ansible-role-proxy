@@ -32,11 +32,22 @@
     version: origin/{{ kamailio_version }}
 
 # Compile Build Files
-- name: Compile Kamailio build files.
+- name: Compile Kamailio build files (Debian).
   shell: "{{ item }}"
   with_items:
     - "cd {{ kamailio_dest_directory }}/kamailio && make include_modules='db_postgres' cfg"
     - "cd {{ kamailio_dest_directory }}/kamailio && make all"
     - "cd {{ kamailio_dest_directory }}/kamailio && make install"
+  when: ansible_os_family == 'Debian'
+  notify:
+    - restart kamailio
+
+- name: Compile Kamailio build files (RedHat).
+  shell: "{{ item }}"
+  with_items:
+    - "cd {{ kamailio_dest_directory }}/kamailio && make include_modules='db_postgres' cfg"
+    - "cd {{ kamailio_dest_directory }}/kamailio && scl enable devtoolset-7 bash && make all"
+    - "cd {{ kamailio_dest_directory }}/kamailio && scl enable devtoolset-7 bash && make install"
+  when: ansible_os_family == 'RedHat'
   notify:
     - restart kamailio
