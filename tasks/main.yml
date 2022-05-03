@@ -110,4 +110,4 @@
   when: _dispatcher_destinations.changed
   run_once: true
   notify:
-    - reload dispatcher
+    - restart kamailio
