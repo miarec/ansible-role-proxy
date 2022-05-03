@@ -1,16 +1,5 @@
 ---
 # Install dependencies
-# - name: Install Package Dependencies (RedHat).
-#   become: true
-#   yum:
-#     update_cache: true
-#     state: present
-#     name: "{{ redhat_dependencies }}"
-#   notify:
-#     - restart kamailio
-#     - restart rtpproxy
-
-# Install dependencies
 - name: Install Repo Dependencies (RedHat).
   become: true
   yum:
