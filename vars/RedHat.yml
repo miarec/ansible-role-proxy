@@ -1,7 +1,10 @@
 ---
-redhat_dependencies:
+redhat_repo_dep:
   - epel-release
   - centos-release-scl
+redhat_dep_packages:
+  # - epel-release
+  # - centos-release-scl
   - make
   - "@Development tools"
   - bison
