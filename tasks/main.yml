@@ -9,7 +9,8 @@
     - rtpproxy
 
 - name: Install dependencies (RedHat).
-  include: prep-RedHat.yml
+  # include: prep-RedHat.yml
+  include_tasks: prep-RedHat.yml
   when: ansible_os_family == 'RedHat'
   tags:
     - kamailio
@@ -17,7 +18,8 @@
     - database
 
 - name: Install dependencies (Debian).
-  include: prep-Debian.yml
+  # include: prep-Debian.yml
+  include_tasks: prep-Debian.yml
   when: ansible_os_family == 'Debian'
   tags:
     - kamailio
@@ -67,20 +69,23 @@
 
 # Install Kamailio and RTPProxy
 - name: Install RTPProxy.
-  include: install_rtpproxy.yml
+  # include: install_rtpproxy.yml
+  include_tasks: install_rtpproxy.yml
   when: "not _rtpproxy_install.stat.exists"
   tags:
     - rtpproxy
 
 - name: Install Kamailio.
-  include: install_kamailio.yml
+  # include: install_kamailio.yml
+  include_tasks: install_kamailio.yml
   when: "not _kamailio_install.stat.exists or kamailio_version is not defined or kamailio_version|string not in _kamailio_version.stdout"
   tags:
     - kamailio
 
 # Configure Kamailio Database
 - name: Configure Kamailio database.
-  include: configure_database.yml
+  # include: configure_database.yml
+  include_tasks: configure_database.yml
   when: "db_kam not in _db_kam.stdout or dbuser_kam not in _dbuser_kam.stdout or 'dispatcher' not in _dbtable_kam.stdout"
   tags:
     - kamailio
@@ -89,12 +94,14 @@
 
 # Generate Configuration files
 - name: Configure RTPProxy.
-  include: configure_rtpproxy.yml
+  # include: configure_rtpproxy.yml
+  include_tasks: configure_rtpproxy.yml
   tags:
     - rtpproxy
 
 - name: Configure Kamailio.
-  include: configure_kamailio.yml
+  # include: configure_kamailio.yml
+  include_tasks: configure_kamailio.yml
   tags:
     - kamailio
 

@@ -1,0 +1,15 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+
+  vars_files:
+   - vars/sipproxy.yml
+  pre_tasks:
+    - name: Update APT cache (Debian).
+      apt:
+        update_cache: true
+
+
+  roles:
+   - role: ansible-role-sip-proxy
