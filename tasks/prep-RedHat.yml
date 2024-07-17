@@ -27,3 +27,12 @@
   notify:
     - restart kamailio
     - restart rtpproxy
+
+# Install mysql if needed
+- name: Install MySQL
+  become: true
+  apt:
+    update_cache: true
+    state: present
+    pkg: mysql-server
+  when: db_postgresql

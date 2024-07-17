@@ -31,8 +31,9 @@
     clone: true
     version: origin/{{ kamailio_version }}
 
+
 # Compile Build Files
-- name: Compile Kamailio build files.
+- name: Compile Kamailio build files with MySQL.
   shell: "{{ item }}"
   with_items:
     - "cd {{ kamailio_dest_directory }}/kamailio && make include_modules='db_postgres' cfg"
@@ -40,3 +41,15 @@
     - "cd {{ kamailio_dest_directory }}/kamailio && make install"
   notify:
     - restart kamailio
+  when: not db_postgresql
+
+
+- name: Compile Kamailio build files with PostgreSQL.
+  shell: "{{ item }}"
+  with_items:
+    - "cd {{ kamailio_dest_directory }}/kamailio && make include_modules='db_postgres' cfg"
+    - "cd {{ kamailio_dest_directory }}/kamailio && make all"
+    - "cd {{ kamailio_dest_directory }}/kamailio && make install"
+  notify:
+    - restart kamailio
+  when: db_postgresql

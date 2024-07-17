@@ -16,6 +16,7 @@
     owner: root
     group: root
     mode: 0600
+  when: db_postgresql
 
 # Run kamdbctl to setup kamailio database
 - name: Create Kamailio database.

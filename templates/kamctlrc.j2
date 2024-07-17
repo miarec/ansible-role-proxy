@@ -3,8 +3,10 @@
 
 ## The Kamailio configuration file for the control tools.
 
-DBENGINE=PGSQL
+
+{% if db_postgresql == true %}DBENGINE=PGSQL{% else %}DBENGINE=MYSQL{% endif %}
 DBHOST={{ dbhost }}
+
 DBROOTUSER="{{ dbuser_root }}"
 
 INSTALL_EXTRA_TABLES=yes

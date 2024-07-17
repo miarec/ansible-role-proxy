@@ -1,6 +1,10 @@
 # ansible-role-sip-proxy
 This ansible role installs a SIP and RTP proxy to load balance multiple Miarec recorders. This is accomplished using open source sip server [Kamailio](https://github.com/kamailio/kamailio) and [RTPProxy](https://github.com/sippy/rtpproxy)
 
+
+# ToDo
+ - deploy with local db optional
+
 ## Requirements
 Kamailio requires a database to maintain call state and routing destinations, this ansible role assumes this will be a remote PostgreSQL instance
 - PostgreSQL instance
@@ -9,6 +13,24 @@ Kamailio requires a database to maintain call state and routing destinations, th
 ## Architecture and Key Functions
 Kamailio and RTPProxy will act as a SIP and RTP Proxy between Voice Platforms and MiaRec Recorders
 
+SIPProxy with local DB
+```
+      Internet           \        Private Subnet (NAT'd)         \        Private Subnet
+                         \                                       \                   +-----------------+
+                         \                                       \     +------------>| MiaRec Recorder |
+                         \                                       \     |  SIP/RTP    +-----------------+
+                         \                 +----------------+    \     |
+                    +---------+  SIP/RTP   |                |----\-----+
+ {   Voice  }-------| NAT GW  |----------->|  Kamailio /    |    \     |             +-----------------+
+ { Platform }       +---------+            |    RTPProxy /  |    \     +------------>| MiaRec Recorder |
+                         \                 |      MySQL     |    \        SIP/RTP    +-----------------+
+                         \                 +----------------+    \
+                         \                                       \
+                         \                                       \
+                         \                                       \
+```
+
+SIP Proxy with external PostgreSQL instnace
 ```
       Internet           \        Private Subnet (NAT'd)         \        Private Subnet
                          \                                       \                   +-----------------+
@@ -24,6 +46,7 @@ Kamailio and RTPProxy will act as a SIP and RTP Proxy between Voice Platforms an
                          \                               +-------\--------------------->|  PostgreSQL  |
                          \                                       \                      +--------------+
 ```
+
 ### NAT
 The SIP/RTP Proxy is installed in a private network that is behind a NAT Gateway, a public ipv4 address is NAT'd to SIP-Proxy private address, Kamailio handle NAT translation of SIP headers and SDP via [`nathelper module`](https://kamailio.org/docs/modules/5.0.x/modules/nathelper.html) and [`rtpproxy module`](https://kamailio.org/docs/modules/5.1.x/modules/rtpproxy.html)    SDP rewrite depends on RTPProxy application to
 

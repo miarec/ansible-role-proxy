@@ -45,23 +45,25 @@
   register: _rtpproxy_install
   tags: rtpproxy
 
-# Check Database Configuration
-- name: Check if Database '{{ db_kam }}' exists.
-  command: "psql postgres://{{ dbuser_root }}:{{ dbpass_root }}@{{ dbhost }}:{{ dbport }}/{{ db_root }} -c \"\\list\" | grep {{ db_kam }}"
-  changed_when: false
-  register: _db_kam
+- name: Check Postgresql Config
+  when: db_postgresql
+  block:
+    - name: Check if Database '{{ db_kam }}' exists.
+      command: "psql postgres://{{ dbuser_root }}:{{ dbpass_root }}@{{ dbhost }}:{{ dbport }}/{{ db_root }} -c \"\\list\" | grep {{ db_kam }}"
+      changed_when: false
+      register: _db_kam
 
-- name: Check if user {{ dbuser_kam }} exists.
-  command: "psql postgres://{{ dbuser_root }}:{{ dbpass_root }}@{{ dbhost }}:{{ dbport }}/{{ db_root }} -c \"\\du\" | grep {{ dbuser_kam }}"
-  changed_when: false
-  when: "db_kam in _db_kam.stdout"
-  register: _dbuser_kam
+    - name: Check if user {{ dbuser_kam }} exists.
+      command: "psql postgres://{{ dbuser_root }}:{{ dbpass_root }}@{{ dbhost }}:{{ dbport }}/{{ db_root }} -c \"\\du\" | grep {{ dbuser_kam }}"
+      changed_when: false
+      when: "db_kam in _db_kam.stdout"
+      register: _dbuser_kam
 
-- name: Check if dispatcher table exists.
-  command: "psql postgres://{{ dbuser_kam }}:{{ dbpass_kam }}@{{ dbhost }}:{{ dbport }}/{{ db_kam }} -c \"\\dt\" | grep dispatcher"
-  changed_when: false
-  when: "db_kam in _db_kam.stdout and dbuser_kam in _dbuser_kam.stdout"
-  register: _dbtable_kam
+    - name: Check if dispatcher table exists.
+      command: "psql postgres://{{ dbuser_kam }}:{{ dbpass_kam }}@{{ dbhost }}:{{ dbport }}/{{ db_kam }} -c \"\\dt\" | grep dispatcher"
+      changed_when: false
+      when: "db_kam in _db_kam.stdout and dbuser_kam in _dbuser_kam.stdout"
+      register: _dbtable_kam
 
 # Install Kamailio and RTPProxy
 - name: Install RTPProxy.
@@ -84,6 +86,7 @@
     - kamailio
     - database
 
+
 # Generate Configuration files
 - name: Configure RTPProxy.
   include: configure_rtpproxy.yml
@@ -104,8 +107,28 @@
     mode: 0644
   register: _dispatcher_destinations
 
+
+
+- name: Set dispatch command - PSQL
+  set_fact:
+      _dispatch_config_cmd: "psql postgres://{{ dbuser_kam }}:{{ dbpass_kam }}@{{ dbhost }}:{{ dbport }}/{{ db_kam }} -f '/usr/local/etc/kamailio/dispatcher.list.sql'"
+  when: db_postgresql
+
+- name: Set dispatch command - MySQL
+  set_fact:
+      _dispatch_config_cmd: "mysql -u {{ dbuser_kam }} -p '{{ dbpass_kam }}' -h {{ dbhost }} -P {{ dbport }} {{ db_kam }} < /usr/local/etc/kamailio/dispatcher.list.sql"
+  when: not db_postgresql
+
+# - name: Update dispatcher table.
+#   command: "psql postgres://{{ dbuser_kam }}:{{ dbpass_kam }}@{{ dbhost }}:{{ dbport }}/{{ db_kam }} -f '/usr/local/etc/kamailio/dispatcher.list.sql'"
+#   changed_when: true
+#   when: _dispatcher_destinations.changed
+#   run_once: true
+#   notify:
+#     - restart kamailio
+
 - name: Update dispatcher table.
-  command: "psql postgres://{{ dbuser_kam }}:{{ dbpass_kam }}@{{ dbhost }}:{{ dbport }}/{{ db_kam }} -f '/usr/local/etc/kamailio/dispatcher.list.sql'"
+  command: _dispatch_config_cmd
   changed_when: true
   when: _dispatcher_destinations.changed
   run_once: true

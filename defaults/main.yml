@@ -3,6 +3,8 @@
 kamailio_version: 5.5
 
 # database variables
+db_postgresql: false # When True, external postgresql server will be used
+dbhost: "localhost"
 dbuser_root: 'miarec'
 db_root: 'miarecdb'
 dbport: 5432
