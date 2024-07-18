@@ -1,6 +1,6 @@
 ---
 # defaults file for proxy
-kamailio_version: 5.5
+kamailio_version: 5.5.7
 
 # database variables
 dbuser_root: 'miarec'
