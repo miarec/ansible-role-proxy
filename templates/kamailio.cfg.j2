@@ -14,7 +14,9 @@
 #!define FLB_NATB 6
 #!define FLB_NATSIPPING 7
 #
-#!define DBURL "postgres://{{ dbuser_kam }}:{{ dbpass_kam }}@{{ dbhost }}:{{ dbport }}/{{ db_kam }}"
+{% if db_postgresql == true %}#!define DBURL "postgres://{{ dbuser_kam }}:{{ dbpass_kam }}@{{ dbhost }}:{{ dbport }}/{{ db_kam }}"
+{% else %}#!define DBURL "mysql://{{ dbuser_kam }}:{{ dbpass_kam }}@{{ dbhost }}:{{ dbport }}/{{ db_kam }}"
+{% endif %}
 #!define DS_SET {{ disp_set }}}
 #!define DS_ALG {{ disp_alg }}
 #
@@ -58,11 +60,14 @@ loadmodule "acc.so"
 loadmodule "counters.so"
 loadmodule "nathelper.so"
 loadmodule "rtpproxy.so"
-{% if enable_tls == true %}loadmodule "tls.so"{% endif %}
+{% if enable_tls == true %}loadmodule "tls.so"
+{% endif %}
 {% if enable_anitflood == true %}loadmodule "htable.so"
-loadmodule "pike.so"{% endif %}
-{% if enable_debug == true %}loadmodule "debugger.so"{% endif %}
-loadmodule "db_postgres.so"
+loadmodule "pike.so"
+{% endif %}
+{% if enable_debug == true %}loadmodule "debugger.so"
+{% endif %}
+{% if db_postgresql == true %}loadmodule "db_postgres.so"{% else %}loadmodule "db_mysql.so"{% endif %}
 loadmodule "dispatcher.so"
 #
 # ----------------- setting module-specific parameters ---------------

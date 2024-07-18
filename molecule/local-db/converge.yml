@@ -1,0 +1,31 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+
+  pre_tasks:
+    - name: Update APT cache (Debian).
+      apt:
+        update_cache: true
+
+    - set_fact:
+        dbuser_root: root
+        public_ip_address: "1.2.3.4"
+        private_ip_address: "127.0.0.1"
+        dispatcher_destinations: [{
+            "name": "molecule_test_8",
+            "ip": "10.0.0.3",
+            "port": "5080",
+            "protocol": "tcp",
+            "flags": "0",
+            "priority": "0",
+            "attrs": "",
+          }]
+
+    - debug: var=dbport
+
+
+  roles:
+    - role: ansible-role-sip-proxy
+      tags:
+        - sip-proxy

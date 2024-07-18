@@ -25,18 +25,21 @@
 
 - name: Clone Kamailio repository.
   git:
-    repo: git://git.kamailio.org/kamailio
+    repo: https://github.com/kamailio/kamailio.git
     dest: "{{ kamailio_dest_directory }}/kamailio"
     recursive: false
     clone: true
-    version: origin/{{ kamailio_version }}
+    version: "{{ kamailio_version }}"
+
+
 
 
 # Compile Build Files
+
 - name: Compile Kamailio build files with MySQL.
   shell: "{{ item }}"
   with_items:
-    - "cd {{ kamailio_dest_directory }}/kamailio && make include_modules='db_postgres' cfg"
+    - "cd {{ kamailio_dest_directory }}/kamailio && make include_modules='db_mysql' cfg"
     - "cd {{ kamailio_dest_directory }}/kamailio && make all"
     - "cd {{ kamailio_dest_directory }}/kamailio && make install"
   notify:
@@ -53,3 +56,13 @@
   notify:
     - restart kamailio
   when: db_postgresql
+
+# - name: Compile Kamailio build files.
+#   shell: "{{ item }}"
+#   with_items:
+#     - "cd {{ kamailio_dest_directory }}/kamailio && make include_modules='{% if db_postgresql == true %}db_postgres{% else %}db_mysql{% endif %}' cfg"
+#     - "cd {{ kamailio_dest_directory }}/kamailio && make all"
+#     - "cd {{ kamailio_dest_directory }}/kamailio && make install"
+#   notify:
+#     - restart kamailio
+#   # when: db_postgresql

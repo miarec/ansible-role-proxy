@@ -1,13 +1,13 @@
 ---
 # defaults file for proxy
-kamailio_version: 5.5
+kamailio_version: 5.5.7
 
 # database variables
-db_postgresql: false # When True, external postgresql server will be used
+db_postgresql: false    # When True, postgresql server will be used as db backend
 dbhost: "localhost"
-dbuser_root: 'miarec'
-db_root: 'miarecdb'
-dbport: 5432
+dbuser_root: 'root'   # DB Root user account, used to create Kamailio DB
+# db_root: 'miarecdb'   # Im not sure this is used, maybe for postgesql, i will verify
+dbport: "{% if db_postgresql %}5432{% else %}3306{% endif %}"
 db_kam: kamailio
 dbuser_kam: kamailio
 dbpass_kam: kamailiorw

@@ -4,7 +4,13 @@
 ## The Kamailio configuration file for the control tools.
 
 
-{% if db_postgresql == true %}DBENGINE=PGSQL{% else %}DBENGINE=MYSQL{% endif %}
+{% if db_postgresql == true %}
+DBENGINE=PGSQL
+{% else %}
+DBENGINE=MYSQL
+CHARSET="latin1"
+{% endif %}
+
 DBHOST={{ dbhost }}
 
 DBROOTUSER="{{ dbuser_root }}"

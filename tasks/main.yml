@@ -67,6 +67,28 @@
       when: "db_kam in _db_kam.stdout and dbuser_kam in _dbuser_kam.stdout"
       register: _dbtable_kam
 
+
+# Install mysql if needed
+# maybe need to configure, like username and passowrd
+- name: Setup MySQL if enabled
+  when: not db_postgresql
+  block:
+
+    - name: Install mysql-server
+      become: true
+      package:
+        state: present
+        pkg: mysql-server
+
+    - name: Start MySQL Service
+      service:
+        name: mysql
+        state: started
+        enabled: true
+
+
+
+
 # Install Kamailio and RTPProxy
 - name: Install RTPProxy.
   # include: install_rtpproxy.yml
@@ -82,14 +104,16 @@
   tags:
     - kamailio
 
+# look at the condition here
+# create a check for mysql alrteady created
 # Configure Kamailio Database
-- name: Configure Kamailio database.
-  # include: configure_database.yml
-  include_tasks: configure_database.yml
-  when: "db_kam not in _db_kam.stdout or dbuser_kam not in _dbuser_kam.stdout or 'dispatcher' not in _dbtable_kam.stdout"
-  tags:
-    - kamailio
-    - database
+# - name: Configure Kamailio database.
+#   # include: configure_database.yml
+#   include_tasks: configure_database.yml
+#   # when: "db_kam not in _db_kam.stdout or dbuser_kam not in _dbuser_kam.stdout or 'dispatcher' not in _dbtable_kam.stdout"
+#   tags:
+#     - kamailio
+#     - database
 
 
 # Generate Configuration files
@@ -123,7 +147,7 @@
 
 - name: Set dispatch command - MySQL
   set_fact:
-      _dispatch_config_cmd: "mysql -u {{ dbuser_kam }} -p '{{ dbpass_kam }}' -h {{ dbhost }} -P {{ dbport }} {{ db_kam }} < /usr/local/etc/kamailio/dispatcher.list.sql"
+      _dispatch_config_cmd: "mysql --user={{ dbuser_kam }} --password={{ dbpass_kam }} --host={{ dbhost }} --port={{ dbport }} {{ db_kam }} < /usr/local/etc/kamailio/dispatcher.list.sql"
   when: not db_postgresql
 
 # - name: Update dispatcher table.
@@ -135,7 +159,9 @@
 #     - restart kamailio
 
 - name: Update dispatcher table.
-  command: _dispatch_config_cmd
+  # command: "{{ _dispatch_config_cmd }}"
+  shell: "{{ _dispatch_config_cmd }}"
+    # mysql --user=kamailio --password=kamailiorw --host=localhost --port=3306 kamailio < /usr/local/etc/kamailio/dispatcher.list.sql
   changed_when: true
   when: _dispatcher_destinations.changed
   run_once: true
