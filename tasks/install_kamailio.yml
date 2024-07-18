@@ -25,11 +25,11 @@
 
 - name: Clone Kamailio repository.
   git:
-    repo: git://git.kamailio.org/kamailio
+    repo: https://github.com/kamailio/kamailio.git
     dest: "{{ kamailio_dest_directory }}/kamailio"
     recursive: false
     clone: true
-    version: origin/{{ kamailio_version }}
+    version: "{{ kamailio_version }}"
 
 # Compile Build Files
 - name: Compile Kamailio build files.
